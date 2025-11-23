@@ -422,6 +422,25 @@
             background: #667eea;
             color: white;
         }
+
+        /* 加载动画 */
+        .loading-indicator {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .typing-dots::after {
+            content: '';
+            animation: typing 1.5s infinite;
+        }
+
+        @keyframes typing {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
+        }
     </style>
 </head>
 <body>
@@ -622,10 +641,42 @@
         let currentReviewWord = null;
         let synth = window.speechSynthesis;
 
+        // ==================== Kimi API 统一调用函数 ====================
+        async function callKimiAPI(messages, temperature = 0.3) {
+            const apiKey = 'sk-LaP3ofHPzUojd6JUzE9sqnbQprOeGyeXFaqe1v4rhg097kFq';
+            const apiUrl = 'https://api.moonshot.cn/v1/chat/completions';
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'moonshot-v1-8k',
+                        messages: messages,
+                        temperature: temperature,
+                        stream: false
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API调用失败: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('Kimi API调用失败:', error);
+                throw error;
+            }
+        }
+
         // ==================== 模拟单词数据 ====================
         const mockWordGroups = {
             daily: [
-                {word: "welcome", phonetic: "/ˈwelkəm/", meaning: "欢迎", example: "Welcome to our home!", difficulty: "easy"},
+                {word: "welcome", phonetic: "/ˈwelkəm/", meaning: "欢迎", example: "Welcome to our AI English learning platform!", difficulty: "easy"},
                 {word: "journey", phonetic: "/ˈdʒɜːrni/", meaning: "旅程", example: "Life is a long journey.", difficulty: "easy"},
                 {word: "challenge", phonetic: "/ˈtʃælɪndʒ/", meaning: "挑战", example: "Face the challenge bravely.", difficulty: "medium"},
                 {word: "opportunity", phonetic: "/ˌɑːpərˈtuːnəti/", meaning: "机会", example: "Every challenge is an opportunity.", difficulty: "medium"},
@@ -844,13 +895,11 @@
         }
 
         // ==================== AI辅助功能 ====================
-        function showAIDictionary() {
+        async function showAIDictionary() {
             if (currentWordIndex >= currentGroup.length) return;
             
             const word = currentGroup[currentWordIndex].word;
-            const meaning = currentGroup[currentWordIndex].meaning;
             
-            // 模拟AI词典
             const modal = document.createElement('div');
             modal.style.cssText = `
                 position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
@@ -860,60 +909,85 @@
             modal.innerHTML = `
                 <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                     <h3>🔍 AI词典 - ${word}</h3>
-                    <div style="margin: 20px 0;">
-                        <strong>释义：</strong>${meaning}
-                    </div>
-                    <div style="margin: 20px 0;">
-                        <strong>同义词：</strong> ${generateSynonyms(word)}
-                    </div>
-                    <div style="margin: 20px 0;">
-                        <strong>反义词：</strong> ${generateAntonyms(word)}
-                    </div>
-                    <div style="margin: 20px 0;">
-                        <strong>详细用法：</strong> ${generateUsage(word)}
+                    <div id="dictionaryContent" style="margin: 20px 0;">
+                        <div style="text-align: center; color: #999;">🤖 AI正在查询中<span class="typing-dots"></span></div>
                     </div>
                     <button class="btn btn-primary" onclick="this.parentElement.parentElement.remove()">关闭</button>
                 </div>
             `;
             document.body.appendChild(modal);
+            
+            try {
+                const messages = [{
+                    role: 'user',
+                    content: `请提供单词"${word}"的详细信息，包括：
+1. 基本释义
+2. 3-5个常用同义词及其区别
+3. 3-5个常用反义词
+4. 详细用法说明和搭配建议
+5. 2-3个实用例句
+
+请用中文回答，格式清晰易读。`
+                }];
+                
+                const content = await callKimiAPI(messages, 0.3);
+                document.getElementById('dictionaryContent').innerHTML = `<div style="line-height: 1.8;">${content.replace(/\n/g, '<br>')}</div>`;
+            } catch (error) {
+                document.getElementById('dictionaryContent').innerHTML = `
+                    <div style="color: #f44336;">
+                        查询失败: ${error.message}<br>
+                        <small>请检查网络连接或稍后再试</small>
+                    </div>
+                `;
+            }
         }
 
-        function generateSynonyms(word) {
-            const synonyms = {
-                'welcome': 'greet, receive, accept',
-                'challenge': 'test, difficulty, obstacle',
-                'opportunity': 'chance, possibility, opening'
-            };
-            return synonyms[word] || '暂无可用的同义词数据';
-        }
-
-        function generateAntonyms(word) {
-            const antonyms = {
-                'welcome': 'reject, refuse, bid farewell',
-                'challenge': 'support, aid, assistance',
-                'opportunity': 'obstacle, barrier, difficulty'
-            };
-            return antonyms[word] || '暂无可用的反义词数据';
-        }
-
-        function generateUsage(word) {
-            return `这是一个${word.length}个字母的单词，常用于日常对话和书面表达。建议结合例句记忆，并尝试在口语中主动使用。`;
-        }
-
-        function sendChat() {
+        async function sendChat() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             if (!message) return;
 
             addChatMessage(message, 'user');
             input.value = '';
+            
+            // 显示"正在输入"状态
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'chat-message ai';
+            typingIndicator.id = 'typingIndicator';
+            typingIndicator.innerHTML = 'AI正在思考<span class="typing-dots">...</span>';
+            document.getElementById('chatContainer').appendChild(typingIndicator);
+            document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
 
-            // 模拟AI回复
-            setTimeout(() => {
-                const learnedWords = wordDatabase.slice(-10).map(w => w.word);
-                const response = generateAIResponse(message, learnedWords);
+            try {
+                const learnedWords = wordDatabase.slice(-20).map(w => w.word);
+                
+                const messages = [{
+                    role: 'system',
+                    content: `你是一位友好的AI英语陪练伙伴。用户已经学习了这些单词：${learnedWords.join(', ')}
+
+请遵循以下规则：
+1. 主动发起对话，在对话中自然地使用这些单词（至少5个）
+2. 对话要简短友好，适合初学者理解
+3. 如果用户回复且有语法错误，请用简单方式纠正
+4. 保持对话连贯，鼓励用户多用英语回复
+5. 用英文回复，但确保难度适中`
+                }, {
+                    role: 'user',
+                    content: message
+                }];
+                
+                const response = await callKimiAPI(messages, 0.7);
+                
+                // 移除"正在输入"指示器
+                typingIndicator.remove();
+                
+                // 添加AI回复
                 addChatMessage(response, 'ai');
-            }, 1000);
+            } catch (error) {
+                typingIndicator.remove();
+                addChatMessage('抱歉，我遇到了一些问题。请稍后再试。', 'ai');
+                console.error('对话生成失败:', error);
+            }
         }
 
         function addChatMessage(text, sender) {
@@ -925,18 +999,9 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function generateAIResponse(userMessage, learnedWords) {
-            if (learnedWords.length === 0) {
-                return "你还没有学习任何单词，快去分组学习吧！";
-            }
-            
-            const randomWords = learnedWords.sort(() => 0.5 - Math.random()).slice(0, 3);
-            return `Great! 让我用你学过的单词来回复：${randomWords.join(', ')}. 继续加油！💪`;
-        }
-
-        function generateStory() {
+        async function generateStory() {
             const container = document.getElementById('storyContainer');
-            container.innerHTML = '<div style="text-align: center;">📝 正在生成故事...</div>';
+            container.innerHTML = '<div class="loading-indicator">📝 AI正在生成故事<span class="typing-dots"></span></div>';
             
             const todayWords = getTodayLearnedWords();
             if (todayWords.length === 0) {
@@ -944,39 +1009,41 @@
                 return;
             }
 
-            // 模拟AI生成故事
-            setTimeout(() => {
-                const story = generateMockStory(todayWords);
-                container.innerHTML = story;
-            }, 2000);
+            const wordList = todayWords.map(w => `${w.word}（${w.meaning}）`).join(', ');
+            
+            try {
+                const messages = [{
+                    role: 'user',
+                    content: `你是一名英语教育专家。请根据以下单词列表创作一段200字左右的趣味短文：
+
+单词列表：${wordList}
+
+要求：
+1. 必须包含所有提供的单词（用英文原文，括号内已标注中文释义）
+2. 情节连贯有故事性，适合英语学习者阅读
+3. 人物对话自然，使用日常口语表达
+4. 难度适中，符合CEFR B1-B2水平
+5. 在故事末尾列出重点词汇回顾
+
+请用HTML格式返回，适当使用<strong>标签突出关键词。`
+                }];
+                
+                const storyHTML = await callKimiAPI(messages, 0.8);
+                container.innerHTML = storyHTML;
+            } catch (error) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #f44336;">
+                        故事生成失败: ${error.message}<br>
+                        <small>请检查网络连接或稍后再试</small>
+                    </div>
+                `;
+            }
         }
 
         function getTodayLearnedWords() {
             const today = new Date().toISOString().split('T')[0];
             const count = studyRecords[today] || 0;
             return wordDatabase.slice(-count);
-        }
-
-        function generateMockStory(words) {
-            if (words.length === 0) return "暂无学习记录。";
-            
-            const wordTexts = words.map(w => `<strong>${w.word}</strong> (${w.meaning})`).join('、');
-            
-            return `
-                <h3>📖 今日所学单词故事</h3>
-                <div style="margin: 20px 0; line-height: 2;">
-                    今天，我踏上了一段新的<span style="color: #667eea;">journey（旅程）</span>。在这个充满
-                    <span style="color: #764ba2;">challenge（挑战）</span>的世界里，每一个
-                    <span style="color: #4CAF50;">opportunity（机会）</span>都值得珍惜。
-                    <br><br>
-                    通过不断的<span style="color: #FF9800;">experience（经验）</span>积累，我们获得宝贵的
-                    <span style="color: #F44336;">knowledge（知识）</span>。这正是我们今天学习的核心词汇：
-                    ${wordTexts}。
-                    <br><br>
-                    <button class="btn btn-primary" onclick="speakStory()">🔊 朗读故事</button>
-                    <button class="btn btn-success" onclick="downloadStory()">💾 保存故事</button>
-                </div>
-            `;
         }
 
         function speakStory() {
@@ -1027,6 +1094,36 @@
         }
 
         // ==================== 智能复习 ====================
+        async function generateReviewOptions(word) {
+            try {
+                const messages = [{
+                    role: 'user',
+                    content: `为单词"${word.word}"生成3个干扰选项，用于英语测试题。
+
+要求：
+- 正确答案是：${word.meaning}
+- 生成3个干扰项，需与正确答案在词义、词性或拼写上相似，具有迷惑性
+- 返回严格的JSON格式：{"correct":"正确释义","distractors":["干扰1","干扰2","干扰3"]}
+- 不要有任何额外文本或格式`
+                }];
+                
+                const content = await callKimiAPI(messages, 0.3);
+                
+                // 尝试解析JSON
+                try {
+                    const parsed = JSON.parse(content);
+                    return [parsed.correct, ...parsed.distractors];
+                } catch {
+                    // 如果解析失败，使用备用方案
+                    return [word.meaning, "相似词义A", "相似词义B", "相似词义C"];
+                }
+            } catch (error) {
+                console.error('干扰项生成失败:', error);
+                // 降级处理：返回基本选项
+                return [word.meaning, "相似词义A", "相似词义B", "相似词义C"];
+            }
+        }
+
         function startReview() {
             updateReviewQueue();
             
@@ -1044,6 +1141,50 @@
             showReviewWord();
         }
 
+        async function showReviewWord() {
+            if (reviewQueue.length === 0) {
+                startReview();
+                return;
+            }
+
+            currentReviewWord = reviewQueue.shift();
+            
+            // 显示加载状态
+            document.getElementById('reviewArea').innerHTML = `
+                <div class="loading-indicator">🤖 正在生成复习题目<span class="typing-dots"></span></div>
+            `;
+            
+            // 生成选项（异步）
+            const options = await generateReviewOptions(currentReviewWord);
+            
+            // 确保正确答案在选项中
+            if (!options.includes(currentReviewWord.meaning)) {
+                options[0] = currentReviewWord.meaning;
+            }
+            
+            // 打乱选项
+            const shuffled = options.sort(() => Math.random() - 0.5);
+            const finalCorrectIndex = shuffled.indexOf(currentReviewWord.meaning);
+
+            const html = `
+                <div class="review-card">
+                    <div class="review-question">${currentReviewWord.word}</div>
+                    <div class="review-options" id="reviewOptions">
+                        ${shuffled.map((opt, i) => `
+                            <div class="review-option" onclick="selectReviewOption(${i === finalCorrectIndex ? 'true' : 'false'})">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="pronunciation-panel" style="justify-content: center;">
+                        <button class="btn btn-primary" onclick="speak('${currentReviewWord.word}')">🔊 发音</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('reviewArea').innerHTML = html;
+        }
+
         function updateReviewQueue() {
             const now = Date.now();
             reviewQueue = wordDatabase.filter(w => {
@@ -1058,53 +1199,6 @@
         function updateReviewCount() {
             updateReviewQueue();
             document.getElementById('reviewCount').textContent = reviewQueue.length;
-        }
-
-        function showReviewWord() {
-            if (reviewQueue.length === 0) {
-                startReview();
-                return;
-            }
-
-            currentReviewWord = reviewQueue.shift();
-            
-            // 生成选择题
-            const options = generateReviewOptions(currentReviewWord);
-            const correctIndex = Math.floor(Math.random() * 4);
-            
-            const html = `
-                <div class="review-card">
-                    <div class="review-question">${currentReviewWord.word}</div>
-                    <div class="review-options" id="reviewOptions">
-                        ${options.map((opt, i) => `
-                            <div class="review-option" onclick="selectReviewOption(${i === correctIndex ? 'true' : 'false'})">
-                                ${opt}
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="pronunciation-panel" style="justify-content: center;">
-                        <button class="btn btn-primary" onclick="speak('${currentReviewWord.word}')">🔊 发音</button>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('reviewArea').innerHTML = html;
-            
-            // 打乱选项
-            const container = document.getElementById('reviewOptions');
-            const shuffled = Array.from(container.children).sort(() => Math.random() - 0.5);
-            shuffled.forEach(child => container.appendChild(child));
-        }
-
-        function generateReviewOptions(word) {
-            const correct = word.meaning;
-            const distractors = [
-                `与"${word.word}"拼写相似的词义`,
-                `与"${word.meaning}"相关的干扰项`,
-                `随机生成的相近词义`
-            ];
-            
-            return [correct, ...distractors];
         }
 
         function selectReviewOption(isCorrect) {
