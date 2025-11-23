@@ -210,6 +210,30 @@
             color: white;
         }
 
+        /* 难度选择器 */
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 8px 16px;
+            border: 2px solid #4CAF50;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .difficulty-btn:hover, .difficulty-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
         /* 进度指示器 */
         .progress-indicator {
             display: flex;
@@ -441,6 +465,21 @@
             66% { content: '...'; }
             100% { content: '.'; }
         }
+
+        /* 难度标签 */
+        .difficulty-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .tag-cet4 { background: #4CAF50; color: white; }
+        .tag-cet6 { background: #FF9800; color: white; }
+        .tag-tem4 { background: #2196F3; color: white; }
+        .tag-tem8 { background: #F44336; color: white; }
     </style>
 </head>
 <body>
@@ -467,6 +506,15 @@
         <div class="page active" id="group">
             <h2 style="text-align: center; margin-bottom: 30px;">📚 分组学习</h2>
             
+            <!-- 难度选择器 -->
+            <div class="difficulty-selector">
+                <div class="difficulty-btn active" data-difficulty="cet4">四级</div>
+                <div class="difficulty-btn" data-difficulty="cet6">六级</div>
+                <div class="difficulty-btn" data-difficulty="tem4">专四</div>
+                <div class="difficulty-btn" data-difficulty="tem8">专八</div>
+            </div>
+
+            <!-- 分类选择器 -->
             <div class="category-selector" id="categorySelector">
                 <div class="category-btn active" data-category="daily">日常</div>
                 <div class="category-btn" data-category="business">商务</div>
@@ -500,7 +548,7 @@
                 <button class="btn btn-danger" onclick="markWord('unknown')">不认识</button>
                 <button class="btn btn-success" onclick="markWord('known')">认识</button>
                 <button class="btn btn-warning" onclick="showAIDictionary()">AI详解</button>
-                <button class="btn btn-primary" id="nextGroupBtn" onclick="nextGroup()" style="display:none;">下一组</button>
+                <button class="btn btn-primary" id="nextGroupBtn" onclick="loadNewWordGroup()" style="display:none;">学习新一组</button>
             </div>
         </div>
 
@@ -610,6 +658,15 @@
             <div class="settings-panel">
                 <h3>⚙️ 设置</h3>
                 <div class="setting-item">
+                    <span>学习难度</span>
+                    <select id="difficultyLevel" style="padding: 5px;">
+                        <option value="cet4">大学英语四级</option>
+                        <option value="cet6">大学英语六级</option>
+                        <option value="tem4">英语专业四级</option>
+                        <option value="tem8">英语专业八级</option>
+                    </select>
+                </div>
+                <div class="setting-item">
                     <span>每日学习目标</span>
                     <input type="number" id="dailyGoal" value="20" min="5" max="100" style="width: 80px; padding: 5px;">
                 </div>
@@ -634,9 +691,10 @@
         let currentGroup = [];
         let currentWordIndex = 0;
         let currentCategory = 'daily';
+        let difficultyLevel = 'cet4'; // 新增：全局难度级别
         let wordDatabase = JSON.parse(localStorage.getItem('wordDatabase') || '[]');
         let studyRecords = JSON.parse(localStorage.getItem('studyRecords') || '{}');
-        let settings = JSON.parse(localStorage.getItem('settings') || '{"dailyGoal": 20, "reminderTime": "20:00", "voice": "US", "rate": 1.0}');
+        let settings = JSON.parse(localStorage.getItem('settings') || '{"dailyGoal": 20, "reminderTime": "20:00", "voice": "US", "rate": 1.0, "difficultyLevel": "cet4"}');
         let reviewQueue = [];
         let currentReviewWord = null;
         let synth = window.speechSynthesis;
@@ -673,47 +731,261 @@
             }
         }
 
-        // ==================== 模拟单词数据 ====================
-        const mockWordGroups = {
-            daily: [
-                {word: "welcome", phonetic: "/ˈwelkəm/", meaning: "欢迎", example: "Welcome to our AI English learning platform!", difficulty: "easy"},
-                {word: "journey", phonetic: "/ˈdʒɜːrni/", meaning: "旅程", example: "Life is a long journey.", difficulty: "easy"},
-                {word: "challenge", phonetic: "/ˈtʃælɪndʒ/", meaning: "挑战", example: "Face the challenge bravely.", difficulty: "medium"},
-                {word: "opportunity", phonetic: "/ˌɑːpərˈtuːnəti/", meaning: "机会", example: "Every challenge is an opportunity.", difficulty: "medium"},
-                {word: "experience", phonetic: "/ɪkˈspɪriəns/", meaning: "经验", example: "Experience is the best teacher.", difficulty: "easy"},
-                {word: "knowledge", phonetic: "/ˈnɑːlɪdʒ/", meaning: "知识", example: "Knowledge is power.", difficulty: "easy"},
-                {word: "achievement", phonetic: "/əˈtʃiːvmənt/", meaning: "成就", example: "This is a great achievement.", difficulty: "medium"},
-                {word: "dedication", phonetic: "/ˌdedɪˈkeɪʃn/", meaning: "奉献", example: "Success requires dedication.", difficulty: "hard"},
-                {word: "perseverance", phonetic: "/ˌpɜːrsəˈvɪrəns/", meaning: "毅力", example: "Perseverance leads to success.", difficulty: "hard"},
-                {word: "passion", phonetic: "/ˈpæʃn/", meaning: "热情", example: "Follow your passion.", difficulty: "easy"}
-            ],
-            business: [
-                {word: "negotiation", phonetic: "/nɪˌɡoʊʃiˈeɪʃn/", meaning: "谈判", example: "The negotiation was successful.", difficulty: "medium"},
-                {word: "investment", phonetic: "/ɪnˈvestmənt/", meaning: "投资", example: "This is a good investment.", difficulty: "easy"},
-                {word: "strategy", phonetic: "/ˈstrætədʒi/", meaning: "策略", example: "We need a new strategy.", difficulty: "medium"},
-                {word: "deadline", phonetic: "/ˈdedlaɪn/", meaning: "截止日期", example: "The deadline is tomorrow.", difficulty: "easy"},
-                {word: "collaboration", phonetic: "/kəˌlæbəˈreɪʃn/", meaning: "合作", example: "Collaboration is key to success.", difficulty: "hard"}
-            ],
-            travel: [
-                {word: "adventure", phonetic: "/ədˈventʃər/", meaning: "冒险", example: "Life is an adventure.", difficulty: "easy"},
-                {word: "destination", phonetic: "/ˌdestɪˈneɪʃn/", meaning: "目的地", example: "What is your destination?", difficulty: "medium"},
-                {word: "landscape", phonetic: "/ˈlændskeɪp/", meaning: "风景", example: "The landscape is beautiful.", difficulty: "easy"},
-                {word: "culture", phonetic: "/ˈkʌltʃər/", meaning: "文化", example: "Experience the local culture.", difficulty: "medium"}
-            ],
-            academic: [
-                {word: "hypothesis", phonetic: "/haɪˈpɑːθəsɪs/", meaning: "假设", example: "The hypothesis needs testing.", difficulty: "hard"},
-                {word: "methodology", phonetic: "/ˌmeθəˈdɑːlədʒi/", meaning: "方法论", example: "What is your methodology?", difficulty: "hard"},
-                {word: "citation", phonetic: "/saɪˈteɪʃn/", meaning: "引用", example: "Add a citation here.", difficulty: "medium"}
-            ],
-            tech: [
-                {word: "algorithm", phonetic: "/ˈælɡərɪðəm/", meaning: "算法", example: "This algorithm is efficient.", difficulty: "medium"},
-                {word: "innovation", phonetic: "/ˌɪnəˈveɪʃn/", meaning: "创新", example: "Innovation drives progress.", difficulty: "medium"},
-                {word: "network", phonetic: "/ˈnetwɜːrk/", meaning: "网络", example: "The network is down.", difficulty: "easy"}
-            ]
-        };
+        // ==================== AI生成单词组功能 ====================
+        async function generateNewWordGroup(category, difficulty) {
+            // 获取已学过的单词列表
+            const learnedWords = wordDatabase.map(w => w.word).join(', ');
+            const learnedWordsInfo = learnedWords || '暂无已学单词（首次学习）';
+            
+            const message = {
+                role: 'user',
+                content: `请生成10个不重复的英语单词，要求：
+1. 难度级别：${difficultyLevelText(difficulty)}（${difficulty}）
+2. 分类：${categoryText(category)}
+3. 格式要求：返回一个JSON数组，每个元素包含：word, phonetic, meaning, example, difficulty
+4. 确保这些单词常见且实用
+5. 绝对不能重复用户已学过的单词（用户已学过的单词有：${learnedWordsInfo}）
+6. 如果已学单词太多，请优先生成该难度下其他常见词汇
+
+请只返回JSON数组，不要任何其他文本或注释。例如：
+[
+  {
+    "word": "challenge",
+    "phonetic": "/ˈtʃælɪndʒ/",
+    "meaning": "挑战",
+    "example": "Face the challenge bravely.",
+    "difficulty": "medium"
+  }
+]`
+            };
+            
+            try {
+                const content = await callKimiAPI([message], 0.3);
+                console.log('AI原始响应:', content); // 调试日志
+                
+                // 尝试解析JSON
+                try {
+                    // 清理可能的markdown标记
+                    const cleanedContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                    const words = JSON.parse(cleanedContent);
+                    
+                    // 验证格式
+                    if (Array.isArray(words) && words.length > 0) {
+                        // 过滤掉已学过的单词（双重保险）
+                        const filteredWords = words.filter(w => !wordDatabase.some(db => db.word === w.word));
+                        
+                        if (filteredWords.length === 0) {
+                            throw new Error('AI生成的单词已全部学过');
+                        }
+                        
+                        return filteredWords.slice(0, 10).map(w => ({
+                            ...w,
+                            category: category,
+                            nextReview: Date.now(),
+                            reviewCount: 0,
+                            difficultyFactor: 2.5,
+                            status: 'new',
+                            id: `${Date.now()}-${Math.random()}`
+                        }));
+                    }
+                    throw new Error('返回的数据格式不正确');
+                } catch (error) {
+                    console.error('解析AI返回的单词失败:', error);
+                    // 降级使用mock数据
+                    alert('AI生成单词失败，使用内置词库');
+                    return getMockWords(category);
+                }
+            } catch (error) {
+                console.error('AI生成单词失败:', error);
+                // 降级使用mock数据
+                alert('AI生成单词失败，使用内置词库');
+                return getMockWords(category);
+            }
+        }
+
+        // 获取难度级别的文本描述
+        function difficultyLevelText(level) {
+            const map = {
+                'cet4': '大学英语四级',
+                'cet6': '大学英语六级',
+                'tem4': '英语专业四级',
+                'tem8': '英语专业八级'
+            };
+            return map[level] || '四级';
+        }
+
+        // 获取分类的文本描述
+        function categoryText(category) {
+            const map = {
+                'daily': '日常',
+                'business': '商务',
+                'travel': '旅游',
+                'academic': '学术',
+                'tech': '技术'
+            };
+            return map[category] || '日常';
+        }
+
+        // 从mock数据获取单词（降级方案）
+        function getMockWords(category) {
+            const words = mockWordGroups[category] || mockWordGroups.daily;
+            // 过滤已学过的单词
+            const learnedWords = wordDatabase.map(w => w.word);
+            const newWords = words.filter(w => !learnedWords.includes(w.word));
+            
+            // 如果mock数据全部学完，返回空数组
+            if (newWords.length === 0) {
+                alert('恭喜！该分类下的单词已全部学完！请尝试其他分类或更高难度。');
+                return [];
+            }
+            
+            return newWords.slice(0, 10).map(w => ({
+                ...w,
+                category: category,
+                nextReview: Date.now(),
+                reviewCount: 0,
+                difficultyFactor: 2.5,
+                status: 'new',
+                id: `${Date.now()}-${Math.random()}`
+            }));
+        }
+
+        // ==================== 修改后的干扰项生成 ====================
+        async function generateReviewOptions(word) {
+            try {
+                const messages = [{
+                    role: 'user',
+                    content: `为单词"${word.word}"生成3个干扰选项，用于英语测试题。
+
+要求：
+- 正确答案是中文释义："${word.meaning}"
+- 生成3个中文干扰项，需与正确答案在词义、词性或拼写上相似，具有迷惑性
+- 干扰项必须是**中文**，不能是英文
+- 返回严格的JSON格式：{"correct":"正确的中文释义","distractors":["中文干扰1","中文干扰2","中文干扰3"]}
+- 不要有任何额外文本、注释或markdown格式
+
+示例：
+{"correct":"挑战","distractors":["改变","机会","变化"]}`
+                }];
+                
+                const content = await callKimiAPI(messages, 0.3);
+                console.log('干扰项API响应:', content); // 调试日志
+                
+                // 尝试解析JSON
+                try {
+                    const cleanedContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                    const parsed = JSON.parse(cleanedContent);
+                    
+                    const correct = parsed.correct;
+                    const distractors = parsed.distractors.map(d => d.trim());
+                    
+                    // 验证所有选项都包含中文
+                    const allOptions = [correct, ...distractors];
+                    const hasChinese = allOptions.some(opt => /[\u4e00-\u9fa5]/.test(opt));
+                    
+                    if (hasChinese && distractors.length >= 3) {
+                        return [correct, ...distractors.slice(0, 3)];
+                    }
+                    
+                    // 如果没有中文，强制使用中文
+                    throw new Error('未检测到中文干扰项');
+                } catch (error) {
+                    console.error('解析干扰项失败:', error);
+                    // 降级处理：返回中文干扰项
+                    return generateFallbackOptions(word.meaning);
+                }
+            } catch (error) {
+                console.error('干扰项生成失败:', error);
+                // 降级处理
+                return generateFallbackOptions(word.meaning);
+            }
+        }
+
+        // 生成备用的中文干扰项
+        function generateFallbackOptions(correctMeaning) {
+            const commonDistractors = {
+                '挑战': ['困难', '测试', '任务'],
+                '机会': ['时机', '选择', '可能'],
+                '欢迎': ['接待', '接受', '问候'],
+                '旅程': ['旅行', '行程', '路途'],
+                '经验': ['经历', '技能', '知识'],
+                '知识': ['信息', '学问', '智慧'],
+                '成功': ['胜利', '成就', '完成'],
+                '失败': ['错误', '挫折', '失误']
+            };
+            
+            // 查找常用干扰项，否则生成通用选项
+            const options = commonDistractors[correctMeaning] || 
+                          ['相似概念', '相关词义', '易混淆词'];
+            
+            return [correctMeaning, ...options];
+        }
+
+        // ==================== 修改后的小说生成 ====================
+        async function generateStory() {
+            const container = document.getElementById('storyContainer');
+            container.innerHTML = '<div class="loading-indicator">📝 AI正在生成故事<span class="typing-dots"></span></div>';
+            
+            const todayWords = getTodayLearnedWords();
+            if (todayWords.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999;">今天还没有学习单词，快去分组学习吧！</div>';
+                return;
+            }
+
+            const wordList = todayWords.map(w => `${w.word}（${w.meaning}）`).join(', ');
+            
+            try {
+                const messages = [{
+                    role: 'user',
+                    content: `你是一名英语教育专家。请根据以下单词列表创作一段200字左右的趣味短文：
+
+单词列表：${wordList}
+
+要求：
+1. 必须包含所有提供的单词，格式为：单词（中文释义）
+2. 情节连贯有故事性，适合英语学习者阅读
+3. 人物对话自然，使用日常口语表达
+4. 难度适中，符合CEFR B1-B2水平
+5. 在故事末尾列出重点词汇回顾
+6. 用中文和英文混合的方式，确保每个英文单词后面都跟着括号标注中文释义
+
+示例格式："今天，我踏上了一段新的journey（旅程）。"
+
+请用HTML格式返回，适当使用<strong>标签突出关键词。`
+                }];
+                
+                const storyHTML = await callKimiAPI(messages, 0.8);
+                container.innerHTML = storyHTML;
+            } catch (error) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #f44336;">
+                        故事生成失败: ${error.message}<br>
+                        <small>请检查网络连接或稍后再试</small>
+                    </div>
+                `;
+            }
+        }
 
         // ==================== 初始化 ====================
         document.addEventListener('DOMContentLoaded', function() {
+            // 从设置中加载难度级别
+            difficultyLevel = settings.difficultyLevel || 'cet4';
+            
+            // 初始化难度选择器
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                if (btn.dataset.difficulty === difficultyLevel) {
+                    btn.classList.add('active');
+                }
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    difficultyLevel = this.dataset.difficulty;
+                    settings.difficultyLevel = difficultyLevel;
+                    localStorage.setItem('settings', JSON.stringify(settings));
+                    alert(`难度已切换至：${difficultyLevelText(difficultyLevel)}`);
+                });
+            });
+            
             initializeApp();
             generateProgressIndicator();
             loadNewWordGroup();
@@ -788,21 +1060,36 @@
         }
 
         // ==================== 单词学习 ====================
-        function loadNewWordGroup() {
-            const words = mockWordGroups[currentCategory] || mockWordGroups.daily;
-            currentGroup = words.slice(0, 10).map(w => ({
-                ...w,
-                id: `${Date.now()}-${Math.random()}`,
-                category: currentCategory,
-                nextReview: Date.now(),
-                reviewCount: 0,
-                difficultyFactor: 2.5,
-                status: 'new'
-            }));
+        async function loadNewWordGroup() {
+            // 显示加载状态
+            document.getElementById('wordCard').innerHTML = `
+                <div class="loading-indicator" style="padding: 60px;">
+                    🤖 AI正在生成单词组<span class="typing-dots"></span>
+                    <br><small>难度：${difficultyLevelText(difficultyLevel)} | 分类：${categoryText(currentCategory)}</small>
+                </div>
+            `;
+            document.querySelector('.btn-group').style.display = 'none';
+            
+            // 先尝试用AI生成单词
+            currentGroup = await generateNewWordGroup(currentCategory, difficultyLevel);
+            
+            // 如果AI生成失败或没有新单词，显示提示
+            if (currentGroup.length === 0) {
+                document.getElementById('wordCard').innerHTML = `
+                    <div style="padding: 60px 20px; text-align: center;">
+                        <h2>🎉 恭喜！</h2>
+                        <p>该分类下${difficultyLevelText(difficultyLevel)}难度的单词已全部学完！</p>
+                        <p>请尝试：1) 切换更高难度 2) 选择其他分类 3) 查看单词库</p>
+                        <button class="btn btn-primary" onclick="switchPage('vocabulary')">查看单词库</button>
+                    </div>
+                `;
+                return;
+            }
             
             currentWordIndex = 0;
             document.getElementById('nextGroupBtn').style.display = 'none';
             showCurrentWord();
+            document.querySelector('.btn-group').style.display = 'flex';
         }
 
         function showCurrentWord() {
@@ -821,13 +1108,13 @@
 
             const word = currentGroup[currentWordIndex];
             document.getElementById('wordTitle').textContent = word.word;
-            document.getElementById('phonetic').textContent = word.phonetic;
+            document.getElementById('phonetic').textContent = word.phonetic || '/ˈ' + word.word.toLowerCase() + '/';
             document.getElementById('wordMeaning').textContent = word.meaning;
-            document.getElementById('wordExample').textContent = word.example;
+            document.getElementById('wordExample').textContent = word.example || `This is a sample sentence with ${word.word}.`;
             
             const badge = document.getElementById('difficultyBadge');
-            badge.textContent = word.difficulty.toUpperCase();
-            badge.className = `difficulty-badge difficulty-${word.difficulty}`;
+            badge.textContent = (word.difficulty || 'easy').toUpperCase();
+            badge.className = `difficulty-badge difficulty-${word.difficulty || 'easy'}`;
 
             if (settings.autoSpeak) {
                 setTimeout(() => speakWord(), 500);
@@ -851,6 +1138,8 @@
                     const today = new Date().toISOString().split('T')[0];
                     studyRecords[today] = (studyRecords[today] || 0) + 1;
                     localStorage.setItem('studyRecords', JSON.stringify(studyRecords));
+                    
+                    updateDailyProgress();
                 }
             }
 
@@ -863,11 +1152,6 @@
             setTimeout(() => {
                 switchPage('review');
             }, 2000);
-        }
-
-        function nextGroup() {
-            currentWordIndex = 0;
-            showCurrentWord();
         }
 
         // ==================== 发音功能 ====================
@@ -999,68 +1283,6 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        async function generateStory() {
-            const container = document.getElementById('storyContainer');
-            container.innerHTML = '<div class="loading-indicator">📝 AI正在生成故事<span class="typing-dots"></span></div>';
-            
-            const todayWords = getTodayLearnedWords();
-            if (todayWords.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #999;">今天还没有学习单词，快去分组学习吧！</div>';
-                return;
-            }
-
-            const wordList = todayWords.map(w => `${w.word}（${w.meaning}）`).join(', ');
-            
-            try {
-                const messages = [{
-                    role: 'user',
-                    content: `你是一名英语教育专家。请根据以下单词列表创作一段200字左右的趣味短文：
-
-单词列表：${wordList}
-
-要求：
-1. 必须包含所有提供的单词（用英文原文，括号内已标注中文释义）
-2. 情节连贯有故事性，适合英语学习者阅读
-3. 人物对话自然，使用日常口语表达
-4. 难度适中，符合CEFR B1-B2水平
-5. 在故事末尾列出重点词汇回顾
-
-请用HTML格式返回，适当使用<strong>标签突出关键词。`
-                }];
-                
-                const storyHTML = await callKimiAPI(messages, 0.8);
-                container.innerHTML = storyHTML;
-            } catch (error) {
-                container.innerHTML = `
-                    <div style="text-align: center; color: #f44336;">
-                        故事生成失败: ${error.message}<br>
-                        <small>请检查网络连接或稍后再试</small>
-                    </div>
-                `;
-            }
-        }
-
-        function getTodayLearnedWords() {
-            const today = new Date().toISOString().split('T')[0];
-            const count = studyRecords[today] || 0;
-            return wordDatabase.slice(-count);
-        }
-
-        function speakStory() {
-            const text = document.getElementById('storyContainer').textContent;
-            speak(text);
-        }
-
-        function downloadStory() {
-            const story = document.getElementById('storyContainer').innerHTML;
-            const blob = new Blob([story], {type: 'text/html'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `今日单词故事_${new Date().toLocaleDateString()}.html`;
-            a.click();
-        }
-
         // ==================== 间隔重复算法 ====================
         function calculateNextReview(word, quality) {
             // SM-2算法实现
@@ -1101,27 +1323,67 @@
                     content: `为单词"${word.word}"生成3个干扰选项，用于英语测试题。
 
 要求：
-- 正确答案是：${word.meaning}
-- 生成3个干扰项，需与正确答案在词义、词性或拼写上相似，具有迷惑性
-- 返回严格的JSON格式：{"correct":"正确释义","distractors":["干扰1","干扰2","干扰3"]}
-- 不要有任何额外文本或格式`
+- 正确答案是中文释义："${word.meaning}"
+- 生成3个中文干扰项，需与正确答案在词义、词性或拼写上相似，具有迷惑性
+- 干扰项必须是**中文**，不能是英文
+- 返回严格的JSON格式：{"correct":"正确的中文释义","distractors":["中文干扰1","中文干扰2","中文干扰3"]}
+- 不要有任何额外文本、注释或markdown格式
+
+示例：
+{"correct":"挑战","distractors":["改变","机会","变化"]}`
                 }];
                 
                 const content = await callKimiAPI(messages, 0.3);
+                console.log('干扰项API响应:', content); // 调试日志
                 
                 // 尝试解析JSON
                 try {
-                    const parsed = JSON.parse(content);
-                    return [parsed.correct, ...parsed.distractors];
-                } catch {
-                    // 如果解析失败，使用备用方案
-                    return [word.meaning, "相似词义A", "相似词义B", "相似词义C"];
+                    const cleanedContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                    const parsed = JSON.parse(cleanedContent);
+                    
+                    const correct = parsed.correct;
+                    const distractors = parsed.distractors.map(d => d.trim());
+                    
+                    // 验证所有选项都包含中文
+                    const allOptions = [correct, ...distractors];
+                    const hasChinese = allOptions.some(opt => /[\u4e00-\u9fa5]/.test(opt));
+                    
+                    if (hasChinese && distractors.length >= 3) {
+                        return [correct, ...distractors.slice(0, 3)];
+                    }
+                    
+                    // 如果没有中文，强制使用中文
+                    throw new Error('未检测到中文干扰项');
+                } catch (error) {
+                    console.error('解析干扰项失败:', error);
+                    // 降级处理：返回中文干扰项
+                    return generateFallbackOptions(word.meaning);
                 }
             } catch (error) {
                 console.error('干扰项生成失败:', error);
-                // 降级处理：返回基本选项
-                return [word.meaning, "相似词义A", "相似词义B", "相似词义C"];
+                // 降级处理
+                return generateFallbackOptions(word.meaning);
             }
+        }
+
+        // 生成备用的中文干扰项
+        function generateFallbackOptions(correctMeaning) {
+            const commonDistractors = {
+                '挑战': ['困难', '测试', '任务'],
+                '机会': ['时机', '选择', '可能'],
+                '欢迎': ['接待', '接受', '问候'],
+                '旅程': ['旅行', '行程', '路途'],
+                '经验': ['经历', '技能', '知识'],
+                '知识': ['信息', '学问', '智慧'],
+                '成功': ['胜利', '成就', '完成'],
+                '失败': ['错误', '挫折', '失误']
+            };
+            
+            // 查找常用干扰项，否则生成通用选项
+            const options = commonDistractors[correctMeaning] || 
+                          ['相似概念', '相关词义', '易混淆词'];
+            
+            return [correctMeaning, ...options];
         }
 
         function startReview() {
@@ -1294,7 +1556,7 @@
 
             container.innerHTML = filtered.map(word => `
                 <div class="word-item">
-                    <h3>${word.word}</h3>
+                    <h3>${word.word} <span class="difficulty-tag tag-${word.category}">${categoryText(word.category)}</span></h3>
                     <div style="color: #666; font-size: 14px;">${word.phonetic}</div>
                     <div style="margin: 10px 0;">${word.meaning}</div>
                     <div style="font-size: 12px; color: #999;">
@@ -1466,6 +1728,7 @@
             settings.dailyGoal = parseInt(document.getElementById('dailyGoal').value);
             settings.reminderTime = document.getElementById('reminderTime').value;
             settings.autoSpeak = document.getElementById('autoSpeak').checked;
+            settings.difficultyLevel = difficultyLevel;
             
             localStorage.setItem('settings', JSON.stringify(settings));
             alert('设置已保存！');
