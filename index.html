@@ -2,283 +2,98 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>香港政治光谱测试</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>议会风云：创党记</title>
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --gray-light: #f5f5f5;
+            --gray-medium: #e0e0e0;
+            --gray-dark: #666666;
+            --accent: #000000;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
-            background-color: #ffffff;
-            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+            font-size: 16px;
+            overflow-x: hidden;
         }
         
         .container {
-            max-width: 680px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 40px 24px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding: 16px;
         }
         
-        /* Typography */
+        @media screen and (min-width: 769px) {
+            .container { max-width: 800px; padding: 30px 20px; }
+        }
+        
         h1 {
-            font-size: 32px;
+            font-size: 1.6rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
             margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 24px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #000;
         }
         
         .subtitle {
-            font-size: 14px;
-            color: #666666;
-            margin-bottom: 48px;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.4;
         }
         
-        /* Buttons */
-        .btn-primary {
-            background: #000000;
-            color: #ffffff;
-            border: none;
-            padding: 16px 32px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            width: 100%;
-            transition: opacity 0.2s;
-        }
-        
-        .btn-primary:hover {
-            opacity: 0.8;
-        }
-        
-        .btn-primary:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        
-        .btn-secondary {
-            background: transparent;
-            color: #000000;
-            border: 1px solid #000000;
-            padding: 12px 24px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-secondary:hover {
-            background: #000000;
-            color: #ffffff;
-        }
-        
-        /* Options */
-        .option {
-            border: 1px solid #e5e5e5;
-            padding: 20px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            padding-left: 56px;
-        }
-        
-        .option:hover {
-            border-color: #000000;
-        }
-        
-        .option.selected {
-            background: #000000;
-            color: #ffffff;
-            border-color: #000000;
-        }
-        
-        .option-letter {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-weight: 600;
-            font-size: 14px;
-            opacity: 0.5;
-        }
-        
-        .option.selected .option-letter {
-            opacity: 1;
-            color: #ffffff;
-        }
-        
-        /* Progress */
-        .progress-bar {
-            height: 2px;
-            background: #e5e5e5;
-            margin-bottom: 40px;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #000000;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-text {
-            position: absolute;
-            right: 0;
-            top: -24px;
-            font-size: 12px;
-            color: #999999;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        /* Results */
-        .result-type {
-            font-size: 48px;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            margin-bottom: 8px;
-        }
-        
-        .result-subtitle {
-            font-size: 18px;
-            color: #666666;
-            margin-bottom: 48px;
-            font-weight: 400;
-        }
-        
-        .dimension {
-            margin-bottom: 32px;
-        }
-        
-        .dimension-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #999999;
-            margin-bottom: 8px;
-        }
-        
-        .dimension-bar {
-            height: 4px;
-            background: #f0f0f0;
-            position: relative;
-        }
-        
-        .dimension-center {
-            position: absolute;
-            left: 50%;
+        /* 引导遮罩层 */
+        .guide-overlay {
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             bottom: 0;
-            width: 1px;
-            background: #cccccc;
-            z-index: 1;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
         }
         
-        .dimension-marker {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 12px;
-            height: 12px;
-            background: #000000;
-            border-radius: 50%;
-            z-index: 2;
-            transition: left 0.5s ease;
+        .guide-overlay.active {
+            display: block;
         }
         
-        .party-list {
-            border-top: 1px solid #e5e5e5;
-            margin-top: 48px;
-            padding-top: 24px;
+        .guide-content {
+            background: #fff;
+            margin: 20px auto;
+            max-width: 600px;
+            border: 3px solid #000;
+            padding: 24px;
         }
         
-        .party-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f5f5f5;
-        }
-        
-        .party-name {
-            width: 80px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .party-bar-container {
-            flex: 1;
-            height: 4px;
-            background: #f0f0f0;
-            margin: 0 16px;
-            position: relative;
-        }
-        
-        .party-bar {
-            height: 100%;
-            background: #000000;
-            transition: width 0.5s ease;
-        }
-        
-        .party-score {
-            width: 24px;
-            text-align: right;
-            font-size: 14px;
-            font-variant-numeric: tabular-nums;
-            color: #666666;
-        }
-        
-        .party-item.top-match .party-name {
-            font-weight: 700;
-        }
-        
-        .party-item.top-match .party-score {
-            color: #000000;
-            font-weight: 600;
-        }
-        
-        /* Navigation */
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 48px;
-            padding-top: 24px;
-            border-top: 1px solid #e5e5e5;
-        }
-        
-        .nav-btn {
-            font-size: 14px;
-            color: #666666;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-        
-        .nav-btn:hover {
-            color: #000000;
-        }
-        
-        .nav-btn:disabled {
-            opacity: 0;
-            cursor: default;
-        }
-        
-        .hidden {
+        .guide-step {
             display: none;
         }
         
-        .fade-in {
-            animation: fadeIn 0.4s ease;
+        .guide-step.active {
+            display: block;
+            animation: fadeIn 0.3s;
         }
         
         @keyframes fadeIn {
@@ -286,664 +101,1334 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Image Generation Styles */
-        #image-container {
-            position: absolute;
-            left: -9999px;
-            top: 0;
-            width: 800px;
-            background: #ffffff;
-            padding: 60px;
-            color: #000000;
-        }
-        
-        .img-title {
-            font-size: 42px;
+        .guide-title {
+            font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-        }
-        
-        .img-subtitle {
-            font-size: 20px;
-            color: #666666;
-            margin-bottom: 60px;
-        }
-        
-        .img-section {
-            margin-bottom: 40px;
-        }
-        
-        .img-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #999999;
             margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
         }
         
-        .img-dim {
-            margin-bottom: 24px;
+        .guide-text {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #333;
         }
         
-        .img-dim-header {
+        .guide-text strong {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            font-weight: 700;
+            color: #000;
+        }
+        
+        .guide-highlight-box {
+            background: #f5f5f5;
+            border-left: 4px solid #000;
+            padding: 16px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        
+        .guide-nav {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .guide-nav button {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #000;
+            background: #000;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .guide-nav button.secondary {
+            background: #fff;
+            color: #000;
+        }
+        
+        /* 卡片基础 */
+        .card {
+            border: 2px solid #000;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            background: #fff;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        /* 统计网格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        
+        .stat-box {
+            border: 2px solid #000;
+            padding: 16px 12px;
+            text-align: center;
+            background: #fff;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #000;
+        }
+        
+        .stat-hint {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        /* 议会可视化 */
+        .parliament-viz {
+            border: 2px solid #000;
+            padding: 16px;
+            margin: 16px 0;
+            background: #fff;
+        }
+        
+        .viz-header {
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            align-items: center;
+        }
+        
+        .seat-group {
+            margin: 12px 0;
+        }
+        
+        .seat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .seats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
             margin-bottom: 8px;
         }
         
-        .img-dim-bar {
-            height: 6px;
-            background: #f0f0f0;
+        .seat {
+            width: 14px;
+            height: 14px;
+            border: 1px solid #000;
+            background: #fff;
+            flex-shrink: 0;
+        }
+        
+        @media screen and (max-width: 380px) {
+            .seat { width: 12px; height: 12px; }
+        }
+        
+        .seat.filled {
+            background: #000;
+        }
+        
+        .seat.target {
+            background: repeating-linear-gradient(
+                45deg,
+                #fff,
+                #fff 2px,
+                #000 2px,
+                #000 4px
+            );
+        }
+        
+        .threshold-info {
+            background: #f5f5f5;
+            border: 2px solid #000;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+        
+        /* 输入控件 */
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 16px 0 8px 0;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #000;
+            font-size: 16px;
+            font-family: inherit;
+            background: #fff;
+            margin-bottom: 8px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #000;
+            background: #000;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 8px 0;
+            touch-action: manipulation;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button.secondary {
+            background: #fff;
+            color: #000;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            border-color: #ccc;
+            color: #666;
+        }
+        
+        /* 事件区域 - 关键修复 */
+        .event-area {
+            border: 3px solid #000;
+            padding: 20px 16px;
+            margin: 20px 0;
+            background: #fff;
             position: relative;
         }
         
-        .img-dim-marker {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 16px;
-            height: 16px;
-            background: #000000;
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .event-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            color: #000;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .event-desc {
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            color: #222;
+        }
+        
+        /* 选项按钮 - 关键修复：确保黑字可见 */
+        .choices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .choice-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 16px;
+            border: 2px solid #000;
+            background: #f0f0f0; /* 明确的浅灰背景 */
+            color: #000; /* 明确的黑色文字 */
+            font-size: 1rem;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            position: relative;
+        }
+        
+        .choice-btn:hover, .choice-btn:active {
+            background: #000; /* 悬停时黑底 */
+            color: #fff; /* 悬停时白字 */
+        }
+        
+        .choice-btn:disabled {
+            background: #e0e0e0;
+            border-color: #999;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .choice-tag {
+            display: inline-block;
+            background: #000;
+            color: #fff;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        
+        .choice-text {
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .choice-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .choice-btn:hover .choice-hint {
+            color: #ccc;
+        }
+        
+        /* 提示信息 */
+        .hint-box {
+            background: #fffde7;
+            border: 2px solid #000;
+            padding: 16px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .hint-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* 加载 */
+        .loading-box {
+            text-align: center;
+            padding: 40px;
+            border: 2px dashed #000;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #000;
+            border-top-color: transparent;
             border-radius: 50%;
-            border: 3px solid #ffffff;
-            box-shadow: 0 0 0 1px #000000;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
         }
         
-        .img-footer {
-            margin-top: 60px;
-            padding-top: 24px;
-            border-top: 2px solid #000000;
-            font-size: 13px;
-            color: #999999;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 结果页 */
+        .result-box {
+            border: 3px solid #000;
+            padding: 30px 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .result-number {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        
+        /* 帮助按钮 */
+        .help-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #000;
+            color: #fff;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .help-fab.visible {
             display: flex;
-            justify-content: space-between;
         }
         
-        .img-party-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px 40px;
-        }
-        
-        .img-party-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 15px;
-            padding: 8px 0;
-            border-bottom: 1px solid #eeeeee;
-        }
-        
-        .img-party-name {
-            font-weight: 600;
-        }
-        
-        .img-party-score {
-            color: #666666;
-        }
-        
-        @media (max-width: 640px) {
-            h1 { font-size: 28px; }
-            .result-type { font-size: 36px; }
-            .container { padding: 24px 20px; }
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Start Screen -->
-    <div id="start-screen" class="fade-in">
-        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-            <h1>香港政治<br>光谱测试</h1>
-            <p class="subtitle">基于12项政策议题 · 分析你的政治立场倾向</p>
-            
-            <div style="margin-bottom: 48px; font-size: 14px; line-height: 2; color: #666666;">
-                测试维度<br>
-                <span style="color: #000000;">经济立场</span> · 政府干预 vs 市场自由<br>
-                <span style="color: #000000;">社会价值</span> · 保守传统 vs 进步自由<br>
-                <span style="color: #000000;">教育理念</span> · 国家导向 vs 个人自主<br>
-                <span style="color: #000000;">民生政策</span> · 福利优先 vs 效率优先
+    <!-- 新手引导系统 -->
+    <div id="guide" class="guide-overlay active">
+        <div class="guide-content">
+            <!-- 步骤1：游戏介绍 -->
+            <div class="guide-step active" data-step="1">
+                <div class="guide-title">欢迎来到《议会风云》</div>
+                <div class="guide-text">
+                    这是一款<strong>政治模拟游戏</strong>。你将在香港创立新政党，通过24个回合的政策抉择，争取进入立法会（香港的最高立法机关）。
+                </div>
+                
+                <div class="guide-highlight-box">
+                    <strong>你的目标：</strong><br>
+                    通过回答政治议题，争取民意支持，最终获得尽可能多的议席（共90席）。
+                </div>
+                
+                <div class="guide-text">
+                    即使你对香港政治完全不了解也没关系——游戏会解释每一个概念，你只需要根据自己的直觉选择政策立场。
+                </div>
+                
+                <div class="guide-nav">
+                    <div style="flex:1"></div>
+                    <button onclick="nextGuide()">开始教程</button>
+                </div>
             </div>
-        </div>
-        
-        <button class="btn-primary" onclick="startTest()">开始测试</button>
-    </div>
 
-    <!-- Quiz Screen -->
-    <div id="quiz-screen" class="hidden">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill" style="width: 8.33%"></div>
-            <div class="progress-text"><span id="current-num">1</span> / 12</div>
-        </div>
-        
-        <div id="question-container">
-            <h1 id="question-text" style="font-size: 22px; font-weight: 600; margin-bottom: 32px; line-height: 1.4;"></h1>
-            <div id="options-container"></div>
-        </div>
-        
-        <div class="nav">
-            <button class="nav-btn" id="prev-btn" onclick="prevQuestion()" disabled>← 上一题</button>
-            <button class="nav-btn" id="next-btn" onclick="nextQuestion()" style="font-weight: 600; color: #000000;" disabled>下一题 →</button>
-        </div>
-    </div>
-
-    <!-- Result Screen -->
-    <div id="result-screen" class="hidden">
-        <div class="fade-in">
-            <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #999999; margin-bottom: 16px;">测试结果</div>
-            <div class="result-type" id="result-party"></div>
-            <div class="result-subtitle" id="result-subtitle"></div>
-            
-            <!-- Dimensions -->
-            <div style="margin-bottom: 48px;">
-                <div class="dimension">
-                    <div class="dimension-header">
-                        <span>经济立场</span>
-                        <span id="econ-label">中间</span>
+            <!-- 步骤2：议会是什么？ -->
+            <div class="guide-step" data-step="2">
+                <div class="guide-title">香港立法会是什么？</div>
+                <div class="guide-text">
+                    想象这是香港的"国会"，负责制定法律。共有<strong>90个席位</strong>，由三种不同方式产生：
+                </div>
+                
+                <div style="margin: 16px 0;">
+                    <div style="background:#f5f5f5; border:2px solid #000; padding:12px; margin-bottom:8px;">
+                        <strong>地方选区（20席）</strong><br>
+                        <span style="font-size:0.9rem; color:#666;">由全港市民直接投票选出，类似"选人大代表"。采用<strong>双议席单票制</strong>：每区选2人，每人投1票，得票最高的两人当选。</span>
                     </div>
-                    <div class="dimension-bar">
-                        <div class="dimension-center"></div>
-                        <div class="dimension-marker" id="econ-marker" style="left: 50%"></div>
+                    
+                    <div style="background:#f5f5f5; border:2px solid #000; padding:12px; margin-bottom:8px;">
+                        <strong>功能界别（30席）</strong><br>
+                        <span style="font-size:0.9rem; color:#666;">代表各行各业（如教育界、商界、劳工界），只有该行业从业者可以投票。</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                        <span>政府干预</span>
-                        <span>市场自由</span>
+                    
+                    <div style="background:#f5f5f5; border:2px solid #000; padding:12px;">
+                        <strong>选举委员会（40席）</strong><br>
+                        <span style="font-size:0.9rem; color:#666;">由1500名社会各界精英组成的选举委员会投票产生。</span>
                     </div>
                 </div>
                 
-                <div class="dimension">
-                    <div class="dimension-header">
-                        <span>社会价值</span>
-                        <span id="social-label">中间</span>
-                    </div>
-                    <div class="dimension-bar">
-                        <div class="dimension-center"></div>
-                        <div class="dimension-marker" id="social-marker" style="left: 50%"></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                        <span>保守传统</span>
-                        <span>进步自由</span>
-                    </div>
+                <div class="guide-nav">
+                    <button class="secondary" onclick="prevGuide()">上一步</button>
+                    <button onclick="nextGuide()">下一步</button>
+                </div>
+            </div>
+
+            <!-- 步骤3：游戏机制 -->
+            <div class="guide-step" data-step="3">
+                <div class="guide-title">如何游玩？</div>
+                <div class="guide-text">
+                    游戏共<strong>24个回合</strong>，每回合你会遇到一个政治议题（如住房、教育、劳工等）。你需要选择你的政策立场。
                 </div>
                 
-                <div class="dimension">
-                    <div class="dimension-header">
-                        <span>教育理念</span>
-                        <span id="edu-label">中间</span>
-                    </div>
-                    <div class="dimension-bar">
-                        <div class="dimension-center"></div>
-                        <div class="dimension-marker" id="edu-marker" style="left: 50%"></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                        <span>国家导向</span>
-                        <span>个人自主</span>
-                    </div>
+                <div class="guide-highlight-box">
+                    <strong>核心指标：</strong><br>
+                    • <strong>民意支持度</strong>：影响地方选区得票。越高越好。<br>
+                    • <strong>政治资本</strong>：可以理解为"政治影响力"或"资源"，影响功能界别和选举委员会的表现。<br>
+                    • <strong>议席预测</strong>：根据上述两项实时计算你能赢得多少席。
                 </div>
                 
-                <div class="dimension">
-                    <div class="dimension-header">
-                        <span>民生政策</span>
-                        <span id="welfare-label">中间</span>
-                    </div>
-                    <div class="dimension-bar">
-                        <div class="dimension-center"></div>
-                        <div class="dimension-marker" id="welfare-marker" style="left: 50%"></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                        <span>福利优先</span>
-                        <span>效率优先</span>
-                    </div>
+                <div class="guide-text">
+                    每<strong>3回合</strong>，AI会根据当前局势动态生成一个特殊事件，考验你的应变能力。
+                </div>
+                
+                <div class="guide-nav">
+                    <button class="secondary" onclick="prevGuide()">上一步</button>
+                    <button onclick="nextGuide()">下一步</button>
                 </div>
             </div>
+
+            <!-- 步骤4：选择策略 -->
+            <div class="guide-step" data-step="4">
+                <div class="guide-title">如何选择？</div>
+                <div class="guide-text">
+                    每个选项都有标签（如<strong>「基层劳工」</strong>、<strong>「工商界」</strong>、<strong>「建制派」</strong>等），表示该立场倾向于代表哪方利益。
+                </div>
+                
+                <div class="guide-highlight-box">
+                    <strong>提示：</strong><br>
+                    • 不同选项会影响不同指标（民意支持度↑↓、政治资本↑↓）<br>
+                    • 部分选项需要消耗政治资本（如发动大规模宣传活动）<br>
+                    • 没有"正确答案"，选择符合你价值观的立场即可
+                </div>
+                
+                <div class="guide-text">
+                    游戏结束后，系统会分析你的政治光谱，告诉你最接近香港哪个实际政党的立场。
+                </div>
+                
+                <div class="guide-nav">
+                    <button class="secondary" onclick="prevGuide()">上一步</button>
+                    <button onclick="startGameFromGuide()">开始创党</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助按钮 -->
+    <div class="help-fab" id="helpBtn" onclick="openGuide()">?</div>
+
+    <div class="container">
+        <h1>议会风云：创党记</h1>
+        <div class="subtitle">香港立法会模拟器 · 90席 · 每3回合AI生成动态事件</div>
+
+        <!-- 阶段1：创党 -->
+        <div id="phase-founding">
             
-            <div style="font-size: 14px; line-height: 1.8; color: #666666; margin-bottom: 48px;" id="analysis-text"></div>
+            <div class="hint-box" id="first-hint">
+                <div class="hint-title">
+                    <span>💡</span>
+                    <span>操作提示</span>
+                </div>
+                <div>填写下方信息创立你的政党。时代背景和政治遗产是随机生成的，会影响你的开局优势。</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="card" style="padding: 16px;">
+                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 6px;">时代背景</div>
+                    <div id="era-name" style="font-weight: 700; font-size: 1rem; margin-bottom: 8px;"></div>
+                    <div id="era-desc" style="font-size: 0.85rem; color: #666; line-height: 1.5;"></div>
+                    <div id="era-effect" style="font-size: 0.8rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;"></div>
+                </div>
+                
+                <div class="card" style="padding: 16px;">
+                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 6px;">政治遗产</div>
+                    <div id="legacy-name" style="font-weight: 700; font-size: 1rem; margin-bottom: 8px;"></div>
+                    <div id="legacy-desc" style="font-size: 0.85rem; color: #666; line-height: 1.5;"></div>
+                </div>
+            </div>
+
+            <label>1. 你的政党叫什么名字？</label>
+            <input type="text" id="party-name" placeholder="例如：基层力量联盟、新世代党..." maxlength="20">
             
-            <!-- Party Scores -->
-            <div class="party-list">
-                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #999999; margin-bottom: 16px;">政党匹配度</div>
-                <div id="party-scores"></div>
-            </div>
+            <label>2. 选择政治路线（影响初始立场）</label>
+            <select id="party-ideology">
+                <option value="pragmatic">务实民生路线 - 专注解决住房、就业等具体问题</option>
+                <option value="liberal">自由开放路线 - 强调国际化、个人自由</option>
+                <option value="grassroots">基层劳工路线 - 重视劳动者权益和分配正义</option>
+                <option value="business">工商专业路线 - 支持市场效率和经济发展</option>
+                <option value="radical">改革先锋路线 - 推动激进社会变革</option>
+            </select>
             
-            <div style="margin-top: 48px; display: flex; gap: 12px;">
-                <button class="btn-secondary" onclick="restartTest()" style="flex: 1;">重新测试</button>
-                <button class="btn-primary" onclick="generateImage()" style="flex: 1;">生成结果图片</button>
+            <label>3. 选择参选范围（影响选举策略）</label>
+            <select id="election-type">
+                <option value="gc">地方选区 - 争取市民直接投票（需高民意支持）</option>
+                <option value="fc">功能界别 - 争取特定行业支持（需政治资本）</option>
+                <option value="ecc">选举委员会界别 - 争取精英阶层支持（门槛最高）</option>
+            </select>
+            
+            <div class="hint-box" style="background: #f5f5f5; border-style: dashed;">
+                <strong>双议席单票制说明：</strong><br>
+                如果你选择"地方选区"，需要了解：每区选出2名议员，但选民只有1票。因此<strong>约25%的支持度可赢得第二席</strong>，40%以上可赢得两席。
+            </div>
+
+            <button onclick="startCampaign()" style="margin-top: 16px;">召开创党大会，开始竞选</button>
+        </div>
+
+        <!-- 阶段2：竞选 -->
+        <div id="phase-campaign" class="hidden">
+            
+            <div class="hint-box" id="campaign-hint">
+                <div class="hint-title">
+                    <span>🎮</span>
+                    <span>现在该做什么？</span>
+                </div>
+                <div>下方会显示政治议题，<strong>点击选择一个选项</strong>即可继续。观察上方数字变化，争取更多议席！</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">民意支持度</div>
+                    <div class="stat-value" id="stat-polling">12%</div>
+                    <div class="stat-hint">影响地方选区</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">预计获得议席</div>
+                    <div class="stat-value" id="stat-seats">0席</div>
+                    <div class="stat-hint">共90席</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">政治资本</div>
+                    <div class="stat-value" id="stat-capital">50</div>
+                    <div class="stat-hint">用于应对危机</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">当前回合</div>
+                    <div class="stat-value" id="stat-round">1/24</div>
+                    <div class="stat-hint" id="next-ai-hint">下回AI事件：第3回</div>
+                </div>
+            </div>
+
+            <div class="parliament-viz">
+                <div class="viz-header">
+                    <span>议会席位预测</span>
+                    <span class="badge" id="coalition-status">孤立</span>
+                </div>
+                
+                <div class="seat-group">
+                    <div class="seat-label">
+                        <span>选举委员会界别（40席）</span>
+                        <span id="count-ecc">0席</span>
+                    </div>
+                    <div class="seats-row" id="seats-ecc"></div>
+                </div>
+                
+                <div class="seat-group">
+                    <div class="seat-label">
+                        <span>功能界别（30席）</span>
+                        <span id="count-fc">0席</span>
+                    </div>
+                    <div class="seats-row" id="seats-fc"></div>
+                </div>
+                
+                <div class="seat-group">
+                    <div class="seat-label">
+                        <span>地方选区（20席）- 双议席单票制</span>
+                        <span id="count-gc">0席</span>
+                    </div>
+                    <div class="seats-row" id="seats-gc"></div>
+                </div>
+                
+                <div class="threshold-info">
+                    <strong>当选门槛提示：</strong>地方选区约需 <strong>25%</strong> 民意支持可赢得第二席，当前支持度 <strong id="threshold-current">12%</strong>。<br>
+                    <span style="font-size: 0.8rem; color: #666;">黑色方块=预计当选，斜纹方块=边缘席位（竞争激烈）</span>
+                </div>
+            </div>
+
+            <div id="event-container">
+                <!-- 事件内容 -->
+            </div>
+        </div>
+
+        <!-- 阶段3：结果 -->
+        <div id="phase-result" class="hidden">
+            <div class="result-box">
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">最终选举结果</div>
+                <div class="result-number" id="final-seats">0</div>
+                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">席次 / 90席</div>
+                <div id="final-status" style="color: #666; font-size: 0.9rem;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">政治光谱分析</div>
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 16px; line-height: 1.6;">
+                    根据你在24个议题上的选择，你的政治立场最接近以下香港政党：
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #000; color: #fff;">
+                            <th style="padding: 12px; text-align: left; font-weight: 400;">政党</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 400;">相似度</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 400;">主要一致领域</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-body"></tbody>
+                </table>
+
+                <div style="margin-top: 24px;">
+                    <div class="card-title">你的政策记录</div>
+                    <div id="policy-record" style="background: #f5f5f5; padding: 16px; font-size: 0.85rem; line-height: 1.8; font-family: monospace; border-left: 4px solid #000; max-height: 300px; overflow-y: auto;"></div>
+                </div>
+
+                <div class="card" style="margin-top: 24px; background: #fffde7;">
+                    <div class="card-title">本轮解锁的政治遗产</div>
+                    <div id="new-legacy-name" style="font-weight: 700; margin-bottom: 8px;"></div>
+                    <div id="new-legacy-desc" style="font-size: 0.9rem; color: #666;"></div>
+                    <div style="font-size: 0.8rem; color: #999; margin-top: 12px;">下次开始游戏时可以选择继承此遗产</div>
+                </div>
+
+                <button onclick="location.reload()" style="margin-top: 24px;">重新开局（可选择继承遗产）</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Hidden Image Container -->
-<div id="image-container">
-    <div class="img-title" id="img-party"></div>
-    <div class="img-subtitle" id="img-subtitle"></div>
-    
-    <div class="img-section">
-        <div class="img-label">政治光谱分析</div>
-        
-        <div class="img-dim">
-            <div class="img-dim-header">
-                <span>经济立场</span>
-                <span id="img-econ-text">中间</span>
-            </div>
-            <div class="img-dim-bar">
-                <div class="img-dim-marker" id="img-econ-marker" style="left: 50%"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                <span>政府干预</span>
-                <span>市场自由</span>
-            </div>
-        </div>
-        
-        <div class="img-dim">
-            <div class="img-dim-header">
-                <span>社会价值</span>
-                <span id="img-social-text">中间</span>
-            </div>
-            <div class="img-dim-bar">
-                <div class="img-dim-marker" id="img-social-marker" style="left: 50%"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                <span>保守传统</span>
-                <span>进步自由</span>
-            </div>
-        </div>
-        
-        <div class="img-dim">
-            <div class="img-dim-header">
-                <span>教育理念</span>
-                <span id="img-edu-text">中间</span>
-            </div>
-            <div class="img-dim-bar">
-                <div class="img-dim-marker" id="img-edu-marker" style="left: 50%"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                <span>国家导向</span>
-                <span>个人自主</span>
-            </div>
-        </div>
-        
-        <div class="img-dim">
-            <div class="img-dim-header">
-                <span>民生政策</span>
-                <span id="img-welfare-text">中间</span>
-            </div>
-            <div class="img-dim-bar">
-                <div class="img-dim-marker" id="img-welfare-marker" style="left: 50%"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999999; margin-top: 4px;">
-                <span>福利优先</span>
-                <span>效率优先</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="img-section">
-        <div class="img-label">政党立场匹配度排行</div>
-        <div class="img-party-list" id="img-party-list"></div>
-    </div>
-    
-    <div class="img-footer">
-        <span>香港政治光谱测试</span>
-        <span id="img-date"></span>
-    </div>
-</div>
+    <script>
+        // 游戏状态
+        const game = {
+            round: 1,
+            maxRounds: 24,
+            partyName: '',
+            ideology: '',
+            electionType: 'gc',
+            
+            polling: 12,
+            capital: 50,
+            seats: { ecc: 0, fc: 0, gc: 0 },
+            
+            scores: {
+                economic: 0,
+                social: 0,
+                labor: 0,
+                identity: 0,
+                governance: 0
+            },
+            
+            decisions: [],
+            era: null,
+            legacy: null,
+            aiEventsUsed: 0,
+            guideStep: 1
+        };
 
-<script>
-// Data Structure
-const questions = [
-    {
-        id: 1,
-        text: "近年来青年失业率高居不下，你认为应优先实施的措施是？",
-        options: [
-            { text: "加强就业培训和职业教育", parties: { "民建联": 1, "工党": 1 }, dims: { econ: -1, social: 0, edu: -1, welfare: -1 } },
-            { text: "发展文创产业，创造就业岗位", parties: { "工联会": 1 }, dims: { econ: 0, social: 1, edu: 1, welfare: 0 } },
-            { text: "让青年人充分参与政策制订", parties: { "公民党": 1, "民主党": 1 }, dims: { econ: 0, social: 2, edu: 1, welfare: 0 } },
-            { text: "创建“青年创业园”，提供专项资金", parties: { "经民联": 1 }, dims: { econ: 2, social: 0, edu: 0, welfare: 1 } }
-        ]
-    },
-    {
-        id: 2,
-        text: "近年来越来越多年轻人买不起房，政府是否应该提供低息贷款帮助年轻人买房？",
-        options: [
-            { text: "应该，住房问题是非常基本的民生问题", parties: { "民建联": 1, "工党": 1, "工联会": 1, "公民党": 1, "民主党": 1 }, dims: { econ: -2, social: 0, edu: 0, welfare: -2 } },
-            { text: "不应该，这项政策让年轻人成为“房奴”，还会变相炒高房价", parties: { "经民联": 1 }, dims: { econ: 2, social: 0, edu: 0, welfare: 2 } }
-        ]
-    },
-    {
-        id: 3,
-        text: "对私立学校未来发展的看法？",
-        options: [
-            { text: "公立学校是基础，私立学校只能是补充", parties: { "民建联": 1, "公民党": 1, "民主党": 1 }, dims: { econ: -1, social: 0, edu: -2, welfare: -1 } },
-            { text: "私立学校成绩斐然，政府应该支持私立学校自主发展", parties: { "经民联": 1 }, dims: { econ: 2, social: 0, edu: 2, welfare: 1 } },
-            { text: "现行政策已经足够好", parties: { "工联会": 1 }, dims: { econ: 0, social: 0, edu: 0, welfare: 0 } },
-            { text: "政府应该遏制拿教育谋取利益的风气", parties: { "工党": 1 }, dims: { econ: -2, social: 0, edu: -2, welfare: -1 } }
-        ]
-    },
-    {
-        id: 4,
-        text: "大学开设专业应以就业为导向裁撤“天坑专业”，还是以个人兴趣为导向培养多元人才？",
-        options: [
-            { text: "以个人兴趣为导向，支持“强基计划”等特定学科的人才培养", parties: { "民建联": 1, "民主党": 1, "工党": 1 }, dims: { econ: -1, social: 1, edu: -1, welfare: -1 } },
-            { text: "以就业需求为导向，裁撤“天坑专业”，支持“产学研一体化”", parties: { "经民联": 1 }, dims: { econ: 2, social: -1, edu: 2, welfare: 1 } },
-            { text: "以面向世界为导向，加强学生英文水平，创造更多留学机会", parties: { "公民党": 1 }, dims: { econ: 1, social: 2, edu: 1, welfare: 0 } },
-            { text: "现行政策已经足够好", parties: { "工联会": 1 }, dims: { econ: 0, social: -1, edu: 0, welfare: 0 } }
-        ]
-    },
-    {
-        id: 5,
-        text: "对留学生问题的看法？",
-        options: [
-            { text: "应该录取更多高素质、名校出身的留学生", parties: { "公民党": 1 }, dims: { econ: 1, social: 2, edu: 1, welfare: 0 } },
-            { text: "没什么想法", parties: { "民建联": 1, "工联会": 1, "经民联": 1 }, dims: { econ: 0, social: -1, edu: 0, welfare: 0 } },
-            { text: "留学生太多了，应该录取更多中国学生", parties: { "民主党": 1 }, dims: { econ: -1, social: -1, edu: -1, welfare: 0 } },
-            { text: "留学生太多了，应该录取更多贫困生", parties: { "工党": 1 }, dims: { econ: -2, social: 0, edu: -2, welfare: -2 } }
-        ]
-    },
-    {
-        id: 6,
-        text: "对奥数竞赛的看法？",
-        options: [
-            { text: "有利于提升社会数学水平和选拔理工人才", parties: { "工联会": 1, "公民党": 1, "经民联": 1 }, dims: { econ: 1, social: 0, edu: 1, welfare: 1 } },
-            { text: "奥数竞赛和数学基础教育可以相辅相成", parties: { "民主党": 1, "民建联": 1 }, dims: { econ: 0, social: 0, edu: 0, welfare: 0 } },
-            { text: "偏重优等生，无法提高普通学生数学水平", parties: { "工党": 1 }, dims: { econ: -1, social: 1, edu: -2, welfare: -1 } }
-        ]
-    },
-    {
-        id: 7,
-        text: "关于大学扩招和缩招，你认为政府应？",
-        options: [
-            { text: "扩招，让更多青年有机会接受大学教育", parties: { "民建联": 1, "工联会": 1 }, dims: { econ: -1, social: 0, edu: -1, welfare: -1 } },
-            { text: "保持现状，优先提升教学质量和师生比例", parties: { "民主党": 1 }, dims: { econ: 0, social: 1, edu: 1, welfare: 0 } },
-            { text: "削减部分学额，引导青年转向职业专才教育", parties: { "经民联": 1 }, dims: { econ: 2, social: -1, edu: 2, welfare: 1 } },
-            { text: "保持现状，优先提供更多奖学金和助学金", parties: { "工党": 1 }, dims: { econ: -1, social: 1, edu: 0, welfare: -2 } }
-        ]
-    },
-    {
-        id: 8,
-        text: "关于特殊教育（残障教育）政策，你最支持？",
-        options: [
-            { text: "立法强制所有普通学校接收残障学生，并增拨资源", parties: { "工党": 1, "民主党": 1 }, dims: { econ: -2, social: 2, edu: -1, welfare: -2 } },
-            { text: "保留特殊学校，同时加强普通学校的融合教育支援", parties: { "民建联": 1, "工联会": 1 }, dims: { econ: -1, social: 0, edu: 0, welfare: -1 } },
-            { text: "将特殊教育完全融入主流学校，取消独立特殊学校", parties: { "公民党": 1 }, dims: { econ: -1, social: 2, edu: 0, welfare: -1 } },
-            { text: "增加对特殊教育教师的专业培训，但不强制学校接收残障学生", parties: { "经民联": 1 }, dims: { econ: 1, social: 0, edu: 1, welfare: 0 } }
-        ]
-    },
-    {
-        id: 9,
-        text: "对于少数民族的汉语教育，你认为应？",
-        options: [
-            { text: "在民族学校推行双语教育", parties: { "民主党": 1, "工党": 1, "经民联": 1 }, dims: { econ: 0, social: 1, edu: 1, welfare: 0 } },
-            { text: "融入汉语课堂，额外提供课后辅导", parties: { "民建联": 1 }, dims: { econ: 0, social: -1, edu: -1, welfare: 0 } },
-            { text: "学校可自选模式", parties: { "公民党": 1, "工联会": 1 }, dims: { econ: 1, social: 1, edu: 1, welfare: 0 } }
-        ]
-    },
-    {
-        id: 10,
-        text: "近年来文凭贬值，专科学生就业困难，政府应优先？",
-        options: [
-            { text: "在公务员等岗位设置更多专科学历的对口岗位", parties: { "工党": 1, "民主党": 1 }, dims: { econ: -2, social: 1, edu: -1, welfare: -2 } },
-            { text: "增加专升本考试的名额", parties: { "民建联": 1 }, dims: { econ: -1, social: 0, edu: -1, welfare: -1 } },
-            { text: "加强职业教育和“产学研一体化”", parties: { "经民联": 1, "工联会": 1 }, dims: { econ: 1, social: 0, edu: 2, welfare: 1 } },
-            { text: "逐步取消大专学校，转变为大学", parties: { "公民党": 1 }, dims: { econ: -1, social: 1, edu: -1, welfare: 0 } }
-        ]
-    },
-    {
-        id: 11,
-        text: "近年来有小学将道法科纳入期末考试。你的看法是？",
-        options: [
-            { text: "认同，从小培养学生的家国情怀和公民素质", parties: { "民建联": 1, "工联会": 1 }, dims: { econ: 0, social: -2, edu: -2, welfare: 0 } },
-            { text: "应取消该科，充满道德说教，加重学生负担", parties: { "公民党": 1, "民主党": 1, "工党": 1 }, dims: { econ: 0, social: 2, edu: 2, welfare: 1 } },
-            { text: "保留课程但不强制考试，由学校自主设计教学方案", parties: { "经民联": 1 }, dims: { econ: 1, social: 0, edu: 1, welfare: 1 } }
-        ]
-    },
-    {
-        id: 12,
-        text: "在“双减”政策下，一些地方政府取消小学三年级以下的期中期末考试。你的看法是？",
-        options: [
-            { text: "立即取消，避免过度操练和压力", parties: { "工党": 1, "公民党": 1, "民主党": 1 }, dims: { econ: -1, social: 2, edu: 1, welfare: -1 } },
-            { text: "应该保留，但可以取消学校间排名", parties: { "民建联": 1 }, dims: { econ: 0, social: -1, edu: -1, welfare: 0 } },
-            { text: "完全保留，作为教育质量监测工具", parties: { "经民联": 1, "工联会": 1 }, dims: { econ: 1, social: -1, edu: -2, welfare: 0 } }
-        ]
-    }
-];
+        // 时代与遗产数据
+        const eras = [
+            { name: '经济衰退期', desc: '失业率飙升，青年民怨沸腾，民生议题主导。此时支持劳工政策的选项效果更好。', effect: '劳工议题效果+30%' },
+            { name: '地产泡沫顶峰', desc: '楼价创历史新高，年轻人买不起房成为社会焦点。住房相关选项影响力翻倍。', effect: '房屋政策影响力×2' },
+            { name: '教育改革争论期', desc: '大学排名下滑，家长团体强烈要求改革教育制度。教育议题出现频率增加。', effect: '教育议题必现3次' },
+            { name: '社会撕裂年代', desc: '不同政治阵营对立严重，中间温和路线难以获得支持。', effect: '温和选项支持度-20%' },
+            { name: '繁荣稳定期', desc: '经济向好，市民普遍求稳，不希望剧烈变革。', effect: '激进改革支持度-30%' }
+        ];
 
-// State
-let currentQ = 0;
-let answers = new Array(12).fill(null);
-let scores = {};
-let dimensions = { econ: 0, social: 0, edu: 0, welfare: 0 };
-let sortedParties = [];
+        const legacies = [
+            { name: '工会班底', desc: '创党团队来自劳工界，与基层工人联系紧密。初始劳工支持度较高。', effect: { labor: 20 } },
+            { name: '专业精英网络', desc: '党员多为医生、律师、会计师等专业人士，在教育政策上有话语权。', effect: { governance: 15, capital: 20 } },
+            { name: '区议员班底', desc: '拥有扎实的地区网络，与街坊邻里关系密切，民意基础稳固。', effect: { polling: 8 } },
+            { name: '青年新势力', desc: '党员多为年轻人，社交媒体活跃，激进改革主张吸引力强。', effect: { governance: 20, social: 10 } },
+            { name: '工商界背书', desc: '获得主要商会支持，资金充裕，但在劳工议题上可能受质疑。', effect: { capital: 40, economic: -15 } },
+            { name: '教师团队出身', desc: '创党核心来自教育界，首个教育相关议题自动获得额外支持。', effect: { eduBonus: true } }
+        ];
 
-function startTest() {
-    document.getElementById('start-screen').classList.add('hidden');
-    document.getElementById('quiz-screen').classList.remove('hidden');
-    renderQuestion();
-}
+        // 基础事件库（24个完整事件）
+        const baseEvents = [
+            {
+                id: 1, title: '青年失业危机 / YOUTH_UNEMPLOYMENT', category: '民生',
+                desc: '青年失业率高达20%，社会要求政府立即行动。议会辩论《青年就业支援条例》，你主张采取什么措施？',
+                choices: [
+                    { text: '推动「青年创业园」，提供低息贷款和办公空间，鼓励自主创业', tag: '工商导向', impact: { polling: 3, capital: -5, economic: -5 }, hint: '企业界支持↑ 需消耗资本5点' },
+                    { text: '加强职业培训和学徒制，政府直接创造公共就业岗位', tag: '劳工优先', impact: { polling: 5, capital: -3, economic: 10, labor: 10 }, hint: '民意支持↑ 劳工倾向' },
+                    { text: '发展文创产业，创造柔性就业岗位，发挥年轻人创意', tag: '文化导向', impact: { polling: 2, social: 10 }, hint: '社会开放度↑' },
+                    { text: '成立青年议会，让年轻人直接参与制订政策，增强政治参与', tag: '激进民主', impact: { polling: -2, capital: -8, social: 15 }, hint: '需消耗较多资本' }
+                ]
+            },
+            {
+                id: 2, title: '首次置业低息贷款计划 / FIRST_HOME_SCHEME', category: '房屋',
+                desc: '政府建议设立100亿基金，为青年提供低息置业贷款。你对此持什么立场？',
+                choices: [
+                    { text: '全力支持，扩大至所有年轻家庭，降低申请门槛', tag: '民生优先', impact: { polling: 8, capital: -10, economic: 15 }, hint: '民意支持大幅↑ 需消耗资本' },
+                    { text: '强烈反对，警告这会让年轻人成为「房奴」，变相推高楼价', tag: '市场理性', impact: { polling: -5, capital: 5, economic: -15 }, hint: '工商界支持↑ 但失去基层支持' },
+                    { text: '支持但设限，仅资助购买首套自住房且设入息上限', tag: '中间路线', impact: { polling: 3, capital: -5 }, hint: '平衡各方利益' }
+                ]
+            },
+            {
+                id: 3, title: '私立学校监管条例 / PRIVATE_SCHOOL_REGULATION', category: '教育',
+                desc: '直资学校（半私立）与公立学校资源分配不均，部分直资学校被指「炒卖学位」。你的看法是？',
+                choices: [
+                    { text: '公立学校是教育基础，直资学校只能是补充，政府应加强监管拨款', tag: '政府主导', impact: { polling: 4, economic: 10 }, hint: '支持政府干预教育' },
+                    { text: '直资学校成绩斐然，应支持其自主发展，减少政府干预', tag: '市场效率', impact: { polling: -3, capital: 8, economic: -10 }, hint: '工商界支持↑' },
+                    { text: '现行政策已足够好，无需大幅改动', tag: '维持现状', impact: { polling: 0 }, hint: '保守稳健' },
+                    { text: '打击教育商品化，遏制牟利风气，增加公立学位供给', tag: '反市场化', impact: { polling: 6, capital: -5, economic: 15, labor: 10 }, hint: '基层支持↑' }
+                ]
+            },
+            {
+                id: 4, title: '大学「天坑专业」存废 / UNIVERSITY_MAJOR_REFORM', category: '教育',
+                desc: '人文社科毕业生失业严重，有议员要求大学裁撤「无用学系」，只保留就业好的专业。你怎么看？',
+                choices: [
+                    { text: '大学应以个人兴趣为导向，支持「强基计划」培养基础学科人才', tag: '学术自由', impact: { polling: 2, social: 10 }, hint: '重视学术多元' },
+                    { text: '应以就业为导向，裁撤低就业率学系，推动产学研一体化', tag: '实用主义', impact: { polling: -2, capital: 6, economic: -10 }, hint: '工商界支持↑' },
+                    { text: '加强英文和国际交流，培养全球化人才，提升国际排名', tag: '国际化', impact: { polling: 1, identity: -10 }, hint: '国际化导向' },
+                    { text: '维持现状，大学应自主决定，政府不应干预', tag: '不干预', impact: { polling: -1 }, hint: '保守立场' }
+                ]
+            },
+            {
+                id: 5, title: '非本地生配额争议 / NON_LOCAL_QUOTA', category: '教育',
+                desc: '大学录取大量非本地生（内地及海外），导致本地生学位被压缩，家长团体抗议。你的立场？',
+                choices: [
+                    { text: '应录取更多高素质名校留学生，提升大学国际排名和收入', tag: '精英主义', impact: { polling: -3, capital: 4, identity: -10 }, hint: '国际化但失去本土支持' },
+                    { text: '没什么特别看法，顺其自然，相信大学自主决定', tag: '务实', impact: { polling: 0 }, hint: '中立' },
+                    { text: '留学生太多，应保障本地学生权益，限制非本地生比例', tag: '本土优先', impact: { polling: 5, identity: 10 }, hint: '本土保护主义' },
+                    { text: '应削减留学生名额，增加贫困本地生资助名额', tag: '左翼平等', impact: { polling: 4, capital: -6, economic: 15 }, hint: '平等主义' }
+                ]
+            },
+            {
+                id: 6, title: '奥数竞赛存废 / MATH_OLYMPIAD_DEBATE', category: '教育',
+                desc: '教育界辩论奥数是否加剧精英主义、让普通学生失去资源。应否改革选拔机制？',
+                choices: [
+                    { text: '奥数有利于提升社会数学水平，应扩大参与而非取消', tag: '精英选拔', impact: { polling: -2, capital: 3, governance: 15 }, hint: '精英主义' },
+                    { text: '奥数与基础教育可相辅相成，保留但改革，避免过度操练', tag: '平衡', impact: { polling: 2, governance: 5 }, hint: '温和改革' },
+                    { text: '过于偏重优等生资源，应取消并关注普通学生数学教育', tag: '反精英', impact: { polling: 4, capital: -3, economic: 10 }, hint: '平等主义' }
+                ]
+            },
+            {
+                id: 7, title: '大学扩招与分流 / UNIVERSITY_EXPANSION', category: '教育',
+                desc: '适龄青年大学录取率下降，家长要求增加学额。政府应如何应对？',
+                choices: [
+                    { text: '应大幅扩招，让更多青年接受大学教育，提高普及率', tag: '普及教育', impact: { polling: 6, capital: -8, economic: 10 }, hint: '教育普及化' },
+                    { text: '保持现状，优先提升教学质量和师生比例，不追求数量', tag: '质素优先', impact: { polling: 2, governance: 5 }, hint: '保守稳健' },
+                    { text: '削减部分大学学额，引导青年转向职业专才教育（如护理、技工）', tag: '分流制', impact: { polling: -4, capital: 5, economic: -10 }, hint: '职业教育导向' },
+                    { text: '保持现状但大幅增加奖学金助学金，帮助贫困生完成学业', tag: '资助改革', impact: { polling: 5, capital: -6, economic: 15 }, hint: '福利主义' }
+                ]
+            },
+            {
+                id: 8, title: '特殊教育融合政策 / SPECIAL_EDUCATION_INTEGRATION', category: '教育',
+                desc: '残障学童家长要求进入普通学校（融合教育），但普通学校教师反对，称资源不足。你如何抉择？',
+                choices: [
+                    { text: '立法强制所有普通学校接收残障学生，并增拨额外资源支持', tag: '平权干预', impact: { polling: 3, capital: -10, economic: 15, social: 10 }, hint: '强政府干预 需大量资本' },
+                    { text: '保留特殊学校，同时加强普通学校融合支援，让家长和学校选择', tag: '渐进改革', impact: { polling: 4, economic: 5 }, hint: '温和务实' },
+                    { text: '完全融合，逐步取消独立特殊学校，实现真正平等', tag: '激进包容', impact: { polling: 0, capital: -12, economic: 20 }, hint: '激进平权' },
+                    { text: '加强师资培训但不强制接收，尊重学校自主权', tag: '尊重自主', impact: { polling: -2, economic: -5 }, hint: '保守自由主义' }
+                ]
+            },
+            {
+                id: 9, title: '少数民族语言教育 / MINORITY_LANGUAGE_POLICY', category: '文化',
+                desc: '藏族、蒙古族等少数民族学校应如何教授汉语？这涉及文化保存与国家认同的平衡。',
+                choices: [
+                    { text: '在民族学校推行双语教育，保存民族文化，同时学习国家通用语言', tag: '文化多元', impact: { polling: 2, identity: 5 }, hint: '文化多元主义' },
+                    { text: '融入主流课堂，额外提供课后辅导，加快语言统一', tag: '融合政策', impact: { polling: 1, identity: -5 }, hint: '融合主义' },
+                    { text: '学校可自选教学模式，保持弹性，不作强制规定', tag: '学校自主', impact: { polling: 0, economic: -5 }, hint: '教育自主' }
+                ]
+            },
+            {
+                id: 10, title: '副学位危机与公务员配额 / SUB_DEGREE_CRISIS', category: '就业',
+                desc: '副学位（大专/专科）毕业生失业严重，学历被轻视。政府应如何帮助他们？',
+                choices: [
+                    { text: '公务员及公营机构应设更多专科学历岗位，肯定其价值', tag: '制度配套', impact: { polling: 5, capital: -5, economic: 10, labor: 10 }, hint: '制度性支持' },
+                    { text: '增加专升本考试名额，打通升学阶梯，让副学位成为跳板', tag: '流动机会', impact: { polling: 4, economic: 5 }, hint: '社会流动' },
+                    { text: '加强职业教育和产业合作，培养实用技能而非追求学历', tag: '职教导向', impact: { polling: 2, capital: 3, economic: -5 }, hint: '实用主义' },
+                    { text: '逐步取消副学位，全部升格为大学本科，实现学历平等', tag: '学历平等化', impact: { polling: -3, capital: -8, economic: 15 }, hint: '激进平等' }
+                ]
+            },
+            {
+                id: 11, title: '小学「道法科」争议 / MORAL_EDUCATION_MANDATE', category: '教育',
+                desc: '《道德与法治》科纳入小学期末考试，部分家长批评为「洗脑教育」、加重负担。你怎么看？',
+                choices: [
+                    { text: '认同课程目标，从小培养家国情怀和公民素质，考试可确保落实', tag: '国家认同', impact: { polling: 6, social: -15, identity: 15 }, hint: '国家主义 保守' },
+                    { text: '应取消该科，充满道德说教且加重学生负担，应由家庭教育', tag: '自由教育', impact: { polling: -5, capital: 4, social: 15 }, hint: '自由主义' },
+                    { text: '保留课程但取消强制考试，由学校自主设计教学方案', tag: '温和中间', impact: { polling: 2 }, hint: '温和中间派' }
+                ]
+            },
+            {
+                id: 12, title: '双减政策与考试制度 / EXAM_ABOLITION_DEBATE', category: '教育',
+                desc: '政府拟取消小学三年级以下考试，减轻压力。但教师团体反对，认为需要评估工具。',
+                choices: [
+                    { text: '立即取消，避免过度操练和童年压力，让儿童快乐成长', tag: '快乐学习', impact: { polling: -3, capital: 5, social: 10 }, hint: '进步教育观' },
+                    { text: '应保留考试但取消学校间排名，减少竞争压力但保留评估', tag: '折衷方案', impact: { polling: 4 }, hint: '中间路线' },
+                    { text: '完全保留考试，作为教育质量监测工具，不能盲目减负', tag: '传统评估', impact: { polling: 3, capital: -3, social: -10 }, hint: '保守教育观' }
+                ]
+            },
+            {
+                id: 13, title: '最低工资上调至时薪50元 / MINIMUM_WAGE_HIKE', category: '劳工',
+                desc: '劳工团体要求将最低工资从37.5元大幅提高至50元。商界强烈反对。你的立场？',
+                choices: [
+                    { text: '全力支持，保障基层工人生活水平，对抗通胀', tag: '左翼劳工', impact: { polling: 5, capital: -8, labor: 20, economic: 10 }, hint: '劳工权益优先 需资本' },
+                    { text: '渐进调整至45元，给予中小企业适应期，避免倒闭潮', tag: '温和平衡', impact: { polling: 3, labor: 10 }, hint: '平衡劳资' },
+                    { text: '反对，应由市场决定工资，政府不应干预雇佣自由', tag: '自由市场', impact: { polling: -6, capital: 10, labor: -20, economic: -10 }, hint: '自由市场 工商界支持' },
+                    { text: '支持但设豁免条款（实习生、兼职），保持劳动力市场弹性', tag: '灵活处理', impact: { polling: -2, labor: -5 }, hint: '中间偏商' }
+                ]
+            },
+            {
+                id: 14, title: '劏房租金管制条例 / SUBDIVIDED_FLAT_RENT_CONTROL', category: '房屋',
+                desc: '基层团体要求立法管制劏房（分间楼宇单位）租金及设定最低面积标准（如8平方米）。',
+                choices: [
+                    { text: '立即立法，设定租金上限及最低面积，保障 poorest 租客', tag: '干预主义', impact: { polling: 7, capital: -10, economic: 20, labor: 15 }, hint: '强政府干预 福利主义' },
+                    { text: '分阶段实施，先要求登记及安全标准，再考虑租金管制', tag: '渐进务实', impact: { polling: 4, economic: 10 }, hint: '渐进改革' },
+                    { text: '反对，将减少供应导致租金更贵，应靠增加供应解决', tag: '市场逻辑', impact: { polling: -5, capital: 8, economic: -15 }, hint: '市场主义' },
+                    { text: '改为政府提供过渡性房屋，不干预私人租赁市场', tag: '替代方案', impact: { polling: 3, capital: -5 }, hint: '替代方案' }
+                ]
+            },
+            {
+                id: 15, title: '立法会拉布规则修改 / FILIBUSTER_RULES', category: '议会',
+                desc: '政府建议修订《议事规则》，限制「拉布」（故意拖延辩论）行为，提高立法效率。',
+                choices: [
+                    { text: '全力支持，终结「滥用程序」瘫痪议会，提高行政效率', tag: '效率优先', impact: { polling: 6, governance: 15, social: -10 }, hint: '支持建制 行政主导' },
+                    { text: '反对，这是扼杀少数派监督权的工具，损害议会制衡', tag: '程序正义', impact: { polling: -8, capital: 6, governance: -20, social: 15 }, hint: '支持民主派 程序正义' },
+                    { text: '部分支持，但保留关键议题的充分辩论权，不能一刀切', tag: '平衡妥协', impact: { polling: 2, governance: 5 }, hint: '中间路线' }
+                ]
+            },
+            {
+                id: 16, title: '国歌法本地立法 / NATIONAL_ANTHEM_LAW', category: '宪制',
+                desc: '《国歌条例草案》要求中小学教授国歌，并规定奏唱场合。涉及国家认同与言论自由平衡。',
+                choices: [
+                    { text: '全力支持，中小学必须教授及考核国歌，培养国家认同', tag: '建制保守', impact: { polling: 8, identity: 25, social: -15 }, hint: '国家主义 保守' },
+                    { text: '反对，这是思想教育侵犯言论自由，学校不应政治化', tag: '自由派', impact: { polling: -10, capital: 8, identity: -25, social: 20 }, hint: '自由主义 反对干预' },
+                    { text: '支持立法但豁免中小学考核要求，以奏唱为主不作考试', tag: '务实妥协', impact: { polling: 0, identity: 10 }, hint: '温和建制' },
+                    { text: '要求加入侮辱国歌的详细法律定义，防止执法过宽', tag: '法律技术', impact: { polling: -3, governance: 10 }, hint: '法律专业主义' }
+                ]
+            },
+            {
+                id: 17, title: '垃圾征费先行计划 / WASTE_CHARGING_PILOT', category: '环保',
+                desc: '政府建议推行「按袋收费」垃圾征费，应对堆填区爆满危机。但基层担心增加负担。',
+                choices: [
+                    { text: '立即全面推行，不设过渡期，强制源头减废', tag: '环保激进', impact: { polling: -5, capital: -5, governance: 15 }, hint: '环保优先 激进' },
+                    { text: '支持但设3个月适应期及豁免低收入家庭，避免累退', tag: '务实环保', impact: { polling: 2, labor: 10 }, hint: '环保+社会公平' },
+                    { text: '反对，应先完善回收配套再推行，避免扰民', tag: '先后有序', impact: { polling: 4, capital: 3, governance: -5 }, hint: '渐进主义' },
+                    { text: '强烈反对，增加基层负担且执法困难，应靠教育而非罚款', tag: '基层优先', impact: { polling: 6, capital: -3, governance: -15 }, hint: '基层利益优先' }
+                ]
+            },
+            {
+                id: 18, title: '屯门至赤鱲角隧道定价 / LANTAU_LINK_FARE', category: '交通',
+                desc: '连接新界西与机场/大屿山的新隧道即将通车。定价策略影响区域发展平衡。',
+                choices: [
+                    { text: '免费通行，促进新界西与市区的区域融合，减轻市民负担', tag: '融合主义', impact: { polling: 6, capital: -15, economic: 15 }, hint: '普惠主义 需大量资本' },
+                    { text: '合理收费收回成本，但提供巴士转乘优惠，平衡各方', tag: '可持续', impact: { polling: 3 }, hint: '务实可持续' },
+                    { text: '商业车辆优惠，私家车收取较高费用以疏导交通', tag: '工商优先', impact: { polling: -2, capital: 8, economic: -10 }, hint: '工商界利益' }
+                ]
+            },
+            {
+                id: 19, title: '全民医保强制供款 / HEALTH_INSURANCE_MANDATE', category: '医疗',
+                desc: '政府建议设立强制性储蓄计划（类似公积金）应对老年医疗开支。是否支持强制？',
+                choices: [
+                    { text: '支持，但必须设立低收入豁免机制，不能增加贫困者负担', tag: '福利国家', impact: { polling: 4, capital: -8, economic: 20, labor: 15 }, hint: '福利主义 需资本' },
+                    { text: '反对强制，应维持自愿医保市场，尊重个人选择', tag: '市场解决', impact: { polling: -4, capital: 12, economic: -15 }, hint: '自由主义 市场优先' },
+                    { text: '改为增加烟草税和糖类饮品税（罪恶税）资助医疗，而非强制储蓄', tag: '罪恶税', impact: { polling: 3, economic: 10 }, hint: '进步税收' }
+                ]
+            },
+            {
+                id: 20, title: '长者生活津贴资产上限放宽 / OLD_AGE_ALLOWANCE', category: '福利',
+                desc: '长者「生果金」（高龄津贴）设有资产审查。是否应放宽或取消审查，实现全民高龄津贴？',
+                choices: [
+                    { text: '取消资产审查，实现全民高龄津贴，每位长者每月领取', tag: '全民福利', impact: { polling: 8, capital: -20, economic: 25 }, hint: '普救式福利 需大量资本' },
+                    { text: '放宽上限至50万，但保留审查防滥用，确保公帑用得其所', tag: '目标精准', impact: { polling: 5, economic: 10 }, hint: '选择式福利' },
+                    { text: '维持现行严格审查，确保资源用在最需要的贫困长者', tag: '财政纪律', impact: { polling: -3, capital: 6, economic: -10 }, hint: '财政保守主义' }
+                ]
+            },
+            {
+                id: 21, title: '数码港土地改划住宅 / CYBERPORT_RESIDENTIAL', category: '科技',
+                desc: '建议将部分科技园区用地改作住宅，解决住房短缺与科技用地的矛盾。',
+                choices: [
+                    { text: '全力支持，优先解决住房短缺，科技可另觅地点发展', tag: '房屋优先', impact: { polling: 6, identity: 5, economic: 15 }, hint: '房屋优先于科技' },
+                    { text: '反对，损害香港创科发展根基，应保护科技用地', tag: '科技优先', impact: { polling: -4, capital: 5, governance: 10 }, hint: '科技产业优先' },
+                    { text: '混合用途发展，部分住宅部分科技，实现职住平衡', tag: '混合发展', impact: { polling: 2, economic: 5 }, hint: '平衡发展' }
+                ]
+            },
+            {
+                id: 22, title: '陪审团制度改革 / JURY_SYSTEM_REFORM', category: '司法',
+                desc: '建议引入专业陪审员处理复杂商业罪案，加快审讯速度。是否支持改革普通法传统？',
+                choices: [
+                    { text: '支持，但保留公众陪审团参与重大刑事案件，商业案可用专业人士', tag: '务实司法', impact: { polling: 0, governance: 10 }, hint: '务实改革' },
+                    { text: '反对，陪审团是普通法核心价值，不能因效率牺牲公正', tag: '普通法传统', impact: { polling: -3, capital: 4, governance: -10, social: 10 }, hint: '保守传统' },
+                    { text: '扩大陪审员资格至非永久居民，反映香港国际化社会多元性', tag: '包容开放', impact: { polling: -5, social: 15, identity: -10 }, hint: '激进包容' }
+                ]
+            },
+            {
+                id: 23, title: '外劳输入计划扩容 / FOREIGN_LABOR_EXPANSION', category: '劳工',
+                desc: '建议增加输入外劳配额至10万，解决服务业人手短缺。但工会担心抢本地工人饭碗。',
+                choices: [
+                    { text: '强烈反对，抢夺本地工人饭碗，应优先培训本地失业者', tag: '保护主义', impact: { polling: 8, labor: 25, identity: 15 }, hint: '本土劳工优先' },
+                    { text: '支持，但设工资中位数保护本地劳工，外劳成本不能更低', tag: '条件开放', impact: { polling: 2, labor: 5 }, hint: '条件开放' },
+                    { text: '全力支持，解决结构性人手短缺，维持香港竞争力', tag: '自由流动', impact: { polling: -6, capital: 15, labor: -20, economic: -15 }, hint: '自由市场 工商界支持' },
+                    { text: '仅开放护理及建筑技术工种，本地不愿做的苦差', tag: '行业限定', impact: { polling: 4, labor: 10 }, hint: '针对性开放' }
+                ]
+            },
+            {
+                id: 24, title: '股票印花税上调 / STOCK_STAMP_DUTY_HIKE', category: '财政',
+                desc: '政府建议提高股票交易印花税以填补财政赤字。这会影响香港国际金融中心地位。',
+                choices: [
+                    { text: '反对，将打击香港国际金融中心地位，损害竞争力', tag: '金融枢纽', impact: { polling: -5, capital: 12, economic: -20 }, hint: '商界强烈反对' },
+                    { text: '支持，属于财富再分配，富人应为社会贡献更多', tag: '进步财政', impact: { polling: 4, capital: -6, economic: 15 }, hint: '进步税收' },
+                    { text: '改为征收累进式资产增值税（富人税），而非交易税', tag: '税改激进', impact: { polling: 0, economic: 20 }, hint: '激进税改' }
+                ]
+            }
+        ];
 
-function renderQuestion() {
-    const q = questions[currentQ];
-    document.getElementById('current-num').textContent = currentQ + 1;
-    document.getElementById('progress-fill').style.width = ((currentQ + 1) / 12 * 100) + '%';
-    document.getElementById('question-text').textContent = q.text;
-    
-    const container = document.getElementById('options-container');
-    container.innerHTML = '';
-    
-    q.options.forEach((opt, idx) => {
-        const div = document.createElement('div');
-        div.className = 'option' + (answers[currentQ] === idx ? ' selected' : '');
-        div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + idx)}</span>${opt.text}`;
-        div.onclick = () => selectOption(idx);
-        container.appendChild(div);
-    });
-    
-    document.getElementById('prev-btn').disabled = currentQ === 0;
-    updateNextBtn();
-}
+        // 初始化
+        function init() {
+            game.era = eras[Math.floor(Math.random() * eras.length)];
+            document.getElementById('era-name').textContent = game.era.name;
+            document.getElementById('era-desc').textContent = game.era.desc;
+            document.getElementById('era-effect').textContent = '当前效果：' + game.era.effect;
 
-function selectOption(idx) {
-    answers[currentQ] = idx;
-    renderQuestion();
-    
-    setTimeout(() => {
-        if (currentQ < 11) {
-            currentQ++;
-            renderQuestion();
-        } else {
-            updateNextBtn();
+            game.legacy = legacies[Math.floor(Math.random() * legacies.length)];
+            document.getElementById('legacy-name').textContent = game.legacy.name;
+            document.getElementById('legacy-desc').textContent = game.legacy.desc;
+
+            // 应用效果
+            if (game.legacy.effect) {
+                Object.entries(game.legacy.effect).forEach(([key, val]) => {
+                    if (game.scores[key] !== undefined) game.scores[key] += val;
+                    if (key === 'polling') game.polling += val;
+                    if (key === 'capital') game.capital += val;
+                });
+            }
+
+            renderSeats();
         }
-    }, 250);
-}
 
-function updateNextBtn() {
-    const btn = document.getElementById('next-btn');
-    if (answers[currentQ] !== null) {
-        btn.disabled = false;
-        btn.textContent = currentQ === 11 ? '查看结果' : '下一题 →';
-        btn.style.opacity = '1';
-    } else {
-        btn.disabled = true;
-        btn.style.opacity = '0.3';
-    }
-}
+        // 引导控制
+        function nextGuide() {
+            const steps = document.querySelectorAll('.guide-step');
+            steps[game.guideStep - 1].classList.remove('active');
+            game.guideStep++;
+            steps[game.guideStep - 1].classList.add('active');
+        }
 
-function nextQuestion() {
-    if (currentQ === 11) {
-        calculateResults();
-        showResults();
-    } else if (answers[currentQ] !== null) {
-        currentQ++;
-        renderQuestion();
-    }
-}
+        function prevGuide() {
+            const steps = document.querySelectorAll('.guide-step');
+            steps[game.guideStep - 1].classList.remove('active');
+            game.guideStep--;
+            steps[game.guideStep - 1].classList.add('active');
+        }
 
-function prevQuestion() {
-    if (currentQ > 0) {
-        currentQ--;
-        renderQuestion();
-    }
-}
+        function openGuide() {
+            document.getElementById('guide').classList.add('active');
+        }
 
-function calculateResults() {
-    scores = { "民建联": 0, "工联会": 0, "经民联": 0, "民主党": 0, "公民党": 0, "工党": 0 };
-    dimensions = { econ: 0, social: 0, edu: 0, welfare: 0 };
-    
-    answers.forEach((ansIdx, qIdx) => {
-        if (ansIdx === null) return;
-        const opt = questions[qIdx].options[ansIdx];
-        
-        Object.entries(opt.parties).forEach(([party, val]) => {
-            scores[party] += val;
-        });
-        
-        Object.entries(opt.dims).forEach(([dim, val]) => {
-            dimensions[dim] += val;
-        });
-    });
-    
-    sortedParties = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-}
+        function startGameFromGuide() {
+            document.getElementById('guide').classList.remove('active');
+            document.getElementById('helpBtn').classList.add('visible');
+        }
 
-function showResults() {
-    document.getElementById('quiz-screen').classList.add('hidden');
-    document.getElementById('result-screen').classList.remove('hidden');
-    
-    const topParty = sortedParties[0][0];
-    
-    const desc = {
-        "民建联": { sub: "建制派 · 民生优先 · 传统价值", text: "你倾向于支持政府主导的社会政策，重视国家认同和社会稳定。在教育议题上偏向传统价值与国民教育，强调循序渐进的社会改革，同时关注基层住房与就业需求。" },
-        "工联会": { sub: "建制派 · 劳工权益 · 稳定保守", text: "你重视就业保障和社会稳定，支持政府与商界合作创造就业。在教育上偏向保守实用主义，强调职业技能培养和产业需求对接，主张通过现行体制改善劳工待遇。" },
-        "经民联": { sub: "建制派 · 商界专业 · 市场效率", text: "你偏向自由市场和经济效率，反对政府过度干预住房市场。支持教育产业化与产学研结合，主张专业主义和实用导向，认为市场机制能解决大部分社会问题。" },
-        "民主党": { sub: "泛民 · 温和自由 · 渐进改革", text: "你支持渐进式民主改革，重视个人权利和自由价值。在教育议题上反对过度意识形态灌输，主张包容性和多元文化政策，偏向透过制度内改革实现社会公义。" },
-        "公民党": { sub: "泛民 · 专业中产 · 国际视野", text: "你具有国际视野和专业主义倾向，支持国际化教育和开放政策。重视程序正义、公民参与和法治精神，偏向自由主义的社会价值和经济立场。" },
-        "工党": { sub: "泛民 · 左翼进步 · 社会平等", text: "你持有鲜明的左翼立场，强调社会平等和弱势群体权益。反对教育商品化和住房市场化，主张强福利政策、资源再分配和积极平权措施。" }
-    };
-    
-    document.getElementById('result-party').textContent = topParty;
-    document.getElementById('result-subtitle').textContent = desc[topParty].sub;
-    document.getElementById('analysis-text').textContent = desc[topParty].text;
-    
-    updateDim('econ', dimensions.econ, ['政府干预', '中间', '市场自由']);
-    updateDim('social', dimensions.social, ['保守传统', '中间', '进步自由']);
-    updateDim('edu', dimensions.edu, ['国家导向', '中间', '个人自主']);
-    updateDim('welfare', dimensions.welfare, ['福利优先', '中间', '效率优先']);
-    
-    const maxScore = Math.max(...Object.values(scores));
-    const container = document.getElementById('party-scores');
-    container.innerHTML = '';
-    
-    sortedParties.forEach(([party, score], idx) => {
-        const div = document.createElement('div');
-        div.className = 'party-item' + (idx === 0 ? ' top-match' : '');
-        const width = (score / maxScore * 100) || 0;
-        div.innerHTML = `
-            <div class="party-name">${party}</div>
-            <div class="party-bar-container">
-                <div class="party-bar" style="width: ${width}%"></div>
-            </div>
-            <div class="party-score">${score}</div>
-        `;
-        container.appendChild(div);
-    });
-}
+        function renderSeats() {
+            const ecc = document.getElementById('seats-ecc');
+            ecc.innerHTML = '';
+            for (let i = 0; i < 40; i++) {
+                const s = document.createElement('div');
+                s.className = 'seat';
+                if (i < game.seats.ecc) s.classList.add('filled');
+                else if (i < game.seats.ecc + 2) s.classList.add('target');
+                ecc.appendChild(s);
+            }
 
-function updateDim(type, value, labels) {
-    const normalized = Math.max(-12, Math.min(12, value));
-    const percent = ((normalized + 12) / 24) * 100;
-    
-    document.getElementById(`${type}-marker`).style.left = percent + '%';
-    
-    let label = labels[1];
-    if (normalized < -3) label = labels[0];
-    if (normalized > 3) label = labels[2];
-    document.getElementById(`${type}-label`).textContent = label;
-}
+            const fc = document.getElementById('seats-fc');
+            fc.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                const s = document.createElement('div');
+                s.className = 'seat';
+                if (i < game.seats.fc) s.classList.add('filled');
+                fc.appendChild(s);
+            }
 
-function generateImage() {
-    // Populate image container
-    const topParty = sortedParties[0][0];
-    const desc = {
-        "民建联": "建制派 · 民生优先 · 传统价值",
-        "工联会": "建制派 · 劳工权益 · 稳定保守",
-        "经民联": "建制派 · 商界专业 · 市场效率",
-        "民主党": "泛民 · 温和自由 · 渐进改革",
-        "公民党": "泛民 · 专业中产 · 国际视野",
-        "工党": "泛民 · 左翼进步 · 社会平等"
-    };
-    
-    document.getElementById('img-party').textContent = topParty;
-    document.getElementById('img-subtitle').textContent = desc[topParty];
-    document.getElementById('img-date').textContent = new Date().toLocaleDateString('zh-CN');
-    
-    // Update image dimensions
-    updateImgDim('econ', dimensions.econ, ['政府干预', '中间', '市场自由']);
-    updateImgDim('social', dimensions.social, ['保守传统', '中间', '进步自由']);
-    updateImgDim('edu', dimensions.edu, ['国家导向', '中间', '个人自主']);
-    updateImgDim('welfare', dimensions.welfare, ['福利优先', '中间', '效率优先']);
-    
-    // Update party list for image
-    const imgPartyList = document.getElementById('img-party-list');
-    imgPartyList.innerHTML = '';
-    sortedParties.forEach(([party, score]) => {
-        const div = document.createElement('div');
-        div.className = 'img-party-item';
-        div.innerHTML = `
-            <span class="img-party-name">${party}</span>
-            <span class="img-party-score">${score}分</span>
-        `;
-        imgPartyList.appendChild(div);
-    });
-    
-    // Generate canvas
-    const element = document.getElementById('image-container');
-    
-    html2canvas(element, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        width: 800,
-        height: element.offsetHeight
-    }).then(canvas => {
-        // Convert to blob and download
-        canvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.download = `政治光谱测试_${topParty}_${new Date().getTime()}.png`;
-            link.href = url;
-            link.click();
-            URL.revokeObjectURL(url);
-        }, 'image/png');
-    }).catch(err => {
-        console.error('Image generation failed:', err);
-        alert('图片生成失败，请重试');
-    });
-}
+            const gc = document.getElementById('seats-gc');
+            gc.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const s = document.createElement('div');
+                s.className = 'seat';
+                if (i < game.seats.gc) s.classList.add('filled');
+                gc.appendChild(s);
+            }
 
-function updateImgDim(type, value, labels) {
-    const normalized = Math.max(-12, Math.min(12, value));
-    const percent = ((normalized + 12) / 24) * 100;
-    
-    document.getElementById(`img-${type}-marker`).style.left = percent + '%';
-    
-    let label = labels[1];
-    if (normalized < -3) label = labels[0];
-    if (normalized > 3) label = labels[2];
-    document.getElementById(`img-${type}-text`).textContent = label;
-}
+            document.getElementById('count-ecc').textContent = game.seats.ecc + '席';
+            document.getElementById('count-fc').textContent = game.seats.fc + '席';
+            document.getElementById('count-gc').textContent = game.seats.gc + '席';
+        }
 
-function restartTest() {
-    currentQ = 0;
-    answers = new Array(12).fill(null);
-    sortedParties = [];
-    document.getElementById('result-screen').classList.add('hidden');
-    document.getElementById('start-screen').classList.remove('hidden');
-}
-</script>
+        function startCampaign() {
+            const name = document.getElementById('party-name').value.trim();
+            if (!name) {
+                alert('请先输入政党名称');
+                return;
+            }
+            game.partyName = name;
+            game.ideology = document.getElementById('party-ideology').value;
+            game.electionType = document.getElementById('election-type').value;
 
+            document.getElementById('phase-founding').classList.add('hidden');
+            document.getElementById('phase-campaign').classList.remove('hidden');
+            document.getElementById('helpBtn').classList.add('visible');
+            
+            updateDashboard();
+            nextEvent();
+        }
+
+        function calculateSeats() {
+            game.seats.ecc = Math.floor(game.polling / 2.5);
+            if (game.seats.ecc > 40) game.seats.ecc = 40;
+            
+            game.seats.fc = Math.floor(game.capital / 8);
+            if (game.seats.fc > 30) game.seats.fc = 30;
+            
+            const poll = game.polling;
+            if (poll >= 40) game.seats.gc = 20;
+            else if (poll >= 25) game.seats.gc = 15;
+            else if (poll >= 15) game.seats.gc = 10;
+            else if (poll >= 8) game.seats.gc = 5;
+            else game.seats.gc = 0;
+        }
+
+        function updateDashboard() {
+            document.getElementById('stat-polling').textContent = game.polling.toFixed(1) + '%';
+            document.getElementById('threshold-current').textContent = game.polling.toFixed(1) + '%';
+            document.getElementById('stat-round').textContent = game.round + '/' + game.maxRounds;
+            document.getElementById('next-ai-hint').textContent = '下回AI事件：第' + (Math.ceil(game.round / 3) * 3) + '回';
+            
+            calculateSeats();
+            const total = game.seats.ecc + game.seats.fc + game.seats.gc;
+            document.getElementById('stat-seats').textContent = total + '席';
+            document.getElementById('stat-capital').textContent = game.capital;
+            
+            let status = '孤立';
+            if (total >= 46) status = '执政多数';
+            else if (total >= 23) status = '关键少数';
+            else if (total >= 10) status = '平衡力量';
+            document.getElementById('coalition-status').textContent = status;
+            
+            renderSeats();
+        }
+
+        async function nextEvent() {
+            if (game.round > game.maxRounds) {
+                endGame();
+                return;
+            }
+
+            if (game.round % 3 === 0 && game.round > 1) {
+                await tryAIEvent();
+            } else {
+                showBaseEvent();
+            }
+        }
+
+        async function tryAIEvent() {
+            const container = document.getElementById('event-container');
+            container.innerHTML = `
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <div>正在根据当前局势生成动态事件...</div>
+                </div>
+            `;
+
+            try {
+                const event = await generateAIEvent();
+                if (event) displayEvent(event, true);
+                else showBaseEvent();
+            } catch (e) {
+                console.error(e);
+                showBaseEvent();
+            }
+        }
+
+        async function generateAIEvent() {
+            const recent = game.decisions.slice(-3).map(d => d.title.split('/')[0]).join('、');
+            const prompt = `生成香港政治模拟游戏事件。当前：第${game.round}回合，民意${game.polling.toFixed(0)}%，资本${game.capital}，最近议题：${recent}，时代：${game.era.name}。
+            返回JSON：{"title":"中英文标题","desc":"事件描述（80字）","category":"分类","choices":[{"text":"选项","tag":"标签","impact":{"polling":±数,"capital":±数}}×4]}`;
+
+            const res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer 1f8b0e6fd60d44d2ab0bb3556aed5c47.7Dy1IH5rWVgmblKk',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'GLM-4.7-Flash',
+                    messages: [
+                        {role:'system',content:'生成香港政治模拟游戏事件，返回JSON格式'},
+                        {role:'user',content:prompt}
+                    ],
+                    temperature:0.7,
+                    max_tokens:600
+                })
+            });
+            
+            const data = await res.json();
+            if (data.choices?.[0]) {
+                const match = data.choices[0].message.content.match(/\{[\s\S]*\}/);
+                if (match) {
+                    const ev = JSON.parse(match[0]);
+                    game.aiEventsUsed++;
+                    return ev;
+                }
+            }
+            return null;
+        }
+
+        function showBaseEvent() {
+            const available = baseEvents.filter(e => !game.decisions.find(d => d.id === e.id));
+            const ev = available.length > 0 ? 
+                available[Math.floor(Math.random() * available.length)] : 
+                baseEvents[Math.floor(Math.random() * baseEvents.length)];
+            displayEvent(ev, false);
+        }
+
+        function displayEvent(ev, isAI) {
+            const container = document.getElementById('event-container');
+            
+            let choices = '';
+            ev.choices.forEach((c, i) => {
+                const cost = c.impact?.capital < 0 ? Math.abs(c.impact.capital) : 0;
+                const disabled = cost > game.capital;
+                
+                choices += `
+                    <button class="choice-btn" ${disabled ? 'disabled' : ''} onclick="makeChoice(${i}, ${isAI})">
+                        <span class="choice-tag">${c.tag}</span>
+                        <span class="choice-text">${c.text}</span>
+                        <span class="choice-hint">${c.hint || ''}${disabled ? '（资本不足）' : ''}</span>
+                    </button>
+                `;
+            });
+
+            const aiBanner = isAI ? '<div style="background:#000; color:#fff; padding:10px; margin:-20px -16px 15px -16px; font-weight:700; text-align:center;">⚡ 动态生成事件 · AI GENERATED</div>' : '';
+            
+            container.innerHTML = `
+                <div class="event-area">
+                    ${aiBanner}
+                    <div class="event-header">
+                        <span>第 ${game.round} / ${game.maxRounds} 回合</span>
+                        <span>${ev.category || '政治议题'}</span>
+                    </div>
+                    <div class="event-title">${ev.title}</div>
+                    <div class="event-desc">${ev.desc}</div>
+                    <div class="hint-box" style="margin:0 0 16px 0; background:#fff; border-style: dashed; font-size:0.85rem;">
+                        <strong>💡 操作提示：</strong>点击选择一个选项，不同选择会影响你的民意支持度、政治资本和意识形态倾向。
+                    </div>
+                    <div class="choices-list">${choices}</div>
+                </div>
+            `;
+            
+            window.currentEvent = ev;
+            
+            // 滚动到事件区域（移动端）
+            setTimeout(() => {
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function makeChoice(idx, isAI) {
+            const ev = window.currentEvent;
+            const choice = ev.choices[idx];
+            
+            game.decisions.push({
+                id: ev.id || 'ai-' + game.round,
+                title: ev.title,
+                choice: choice.text,
+                tag: choice.tag,
+                isAI: isAI
+            });
+            
+            if (choice.impact) {
+                if (choice.impact.polling) game.polling += choice.impact.polling;
+                if (choice.impact.capital) game.capital += choice.impact.capital;
+                if (choice.impact.economic) game.scores.economic += choice.impact.economic;
+                if (choice.impact.labor) game.scores.labor += choice.impact.labor;
+                if (choice.impact.social) game.scores.social += choice.impact.social;
+                if (choice.impact.identity) game.scores.identity += choice.impact.identity;
+                if (choice.impact.governance) game.scores.governance += choice.impact.governance;
+            }
+            
+            // 时代效果
+            if (game.era.effect.includes('劳工') && choice.tag.includes('劳工')) game.polling += 2;
+            if (game.era.effect.includes('房屋') && ev.category === '房屋') game.polling += 3;
+            
+            game.polling = Math.max(2, Math.min(70, game.polling));
+            game.capital = Math.max(0, Math.min(100, game.capital));
+            
+            game.round++;
+            updateDashboard();
+            setTimeout(nextEvent, 500);
+        }
+
+        function endGame() {
+            document.getElementById('phase-campaign').classList.add('hidden');
+            document.getElementById('phase-result').classList.remove('hidden');
+            document.getElementById('helpBtn').classList.remove('visible');
+            
+            const total = game.seats.ecc + game.seats.fc + game.seats.gc;
+            document.getElementById('final-seats').textContent = total;
+            
+            let status = '';
+            if (total >= 46) status = '成功组建多数政府，掌握行政主导权';
+            else if (total >= 23) status = '成为议会关键少数，掌握平衡权力';
+            else if (total >= 10) status = '拥有一定发言权，可影响特定议题';
+            else status = '边缘化反对力量，难以推动议程';
+            document.getElementById('final-status').textContent = status;
+            
+            // 计算相似度
+            const profiles = {
+                '民建联': { economic: 10, social: -10, labor: 5, identity: 10, governance: -5 },
+                '工联会': { economic: 15, social: -10, labor: 25, identity: 5, governance: 0 },
+                '经民联': { economic: -20, social: 0, labor: -15, identity: 0, governance: 10 },
+                '民主党': { economic: 0, social: 10, labor: 5, identity: 0, governance: -10 },
+                '公民党': { economic: -5, social: 20, labor: -5, identity: -10, governance: 15 },
+                '工党': { economic: 25, social: 15, labor: 25, identity: 0, governance: -20 }
+            };
+            
+            const similarities = Object.entries(profiles).map(([name, p]) => {
+                let diff = 0;
+                let aligns = [];
+                const keys = ['economic', 'social', 'labor', 'identity', 'governance'];
+                const names = ['经济', '社会', '劳工', '本土', '管治'];
+                
+                keys.forEach((k, i) => {
+                    const d = Math.abs(game.scores[k] - p[k]);
+                    diff += d;
+                    if (d < 15) aligns.push(names[i]);
+                });
+                
+                return { 
+                    name, 
+                    score: Math.max(0, 100 - Math.floor(diff / 2)), 
+                    aligns: aligns.join('、') || '无明显一致'
+                };
+            }).sort((a, b) => b.score - a.score);
+            
+            const tbody = document.getElementById('comparison-body');
+            tbody.innerHTML = similarities.map((s, i) => `
+                <tr style="${i === 0 ? 'background:#000; color:#fff;' : ''}">
+                    <td style="padding:12px; border:1px solid #000;">${s.name}</td>
+                    <td style="padding:12px; border:1px solid #000; text-align:center;">${s.score}%</td>
+                    <td style="padding:12px; border:1px solid #000;">${s.aligns}</td>
+                </tr>
+            `).join('');
+            
+            // 记录
+            const record = game.decisions.map((d, i) => 
+                `${i + 1}. ${d.isAI ? '[AI]' : ''}[${d.tag}] ${d.title.split('/')[0]}`
+            ).join('<br>');
+            document.getElementById('policy-record').innerHTML = record;
+            
+            // 遗产
+            const legacies = [
+                { name: '议会老手', desc: '经历完整会期，下局初始政治资本+30' },
+                { name: '政策专家', desc: `处理${game.decisions.length}项政策，下局民调变化+20%` },
+                { name: 'AI协作者', desc: `使用${game.aiEventsUsed}次AI事件，下局解锁智能辅助` },
+                { name: '联盟建构者', desc: '获得关键议席，下局初始联盟提升' }
+            ];
+            const leg = legacies[Math.floor(Math.random() * legacies.length)];
+            document.getElementById('new-legacy-name').textContent = leg.name;
+            document.getElementById('new-legacy-desc').textContent = leg.desc;
+        }
+
+        init();
+    </script>
 </body>
 </html>
